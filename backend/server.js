@@ -6,6 +6,8 @@ const mongoose = require('mongoose');
 // Apne routes ko import karein
 const authRoute = require('./routes/authRoute.js');
 const teamRoute = require('./routes/teamRoute.js'); // <-- ADD THIS
+const taskRoute = require('./routes/taskRoute.js'); // 👈 ADD THIS
+
 
 const app = express();
 
@@ -22,6 +24,7 @@ mongoose.connect(MONGO_URI)
 // Jab bhi koi /api/auth se shuru hone wala URL aaye, to use authRoute file handle karegi
 app.use('/api/auth', authRoute);
 app.use('/api/teams', teamRoute); // <-- AND ADD THIS
+app.use('/api/tasks', taskRoute); // 👈 AND ADD THIS
 
 
 const PORT = 5000;

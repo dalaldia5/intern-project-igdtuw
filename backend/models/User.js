@@ -16,6 +16,11 @@ const userSchema = new mongoose.Schema({
         required: true,
     },
     // Hum baad mein yahan role aur teamId bhi jodenge
+    teamId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Team',
+        default: null
+    }
 }, {
     timestamps: true, // CreatedAt aur UpdatedAt time apne aap jud jaayega
 });

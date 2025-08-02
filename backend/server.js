@@ -27,7 +27,7 @@ app.use('/api/teams', teamRoute); // <-- AND ADD THIS
 app.use('/api/tasks', taskRoute); // 👈 AND ADD THIS
 
 
-const PORT = 5000;
+const PORT = 5000;z
 app.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
 });

@@ -13,5 +13,5 @@ router.route('/')
 router.route('/:id')
     .put(protect, updateTask)
     .delete(protect, deleteTask);
-zz
+
 module.exports = router;

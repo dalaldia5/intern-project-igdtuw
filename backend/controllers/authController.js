@@ -70,6 +70,21 @@ const loginUser = async (req, res) => {
     }
 };
 
+// @desc    Get user profile
+// @route   GET /api/auth/me
+const getUserProfile = async (req, res) => {
+    // req.user ab 'protect' middleware se aa raha hai
+    if (req.user) {
+        res.json({
+            _id: req.user._id,
+            name: req.user.name,
+            email: req.user.email,
+        });
+    } else {
+        res.status(404).json({ message: 'User not found' });
+    }
+};
+
 
 // Export both functions
-module.exports = { registerUser, loginUser };
+module.exports = { registerUser, loginUser , getUserProfile};

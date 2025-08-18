@@ -14,22 +14,29 @@ const registerUser = async (req, res) => {
             return res.status(400).json({ message: 'User already exists' });
         }
 
-        // 2. Naya user banayein
+        // 2. password ko hash kare
+        // const salt = await bcrypt.genSalt(10); // Salt generate करें
+        // const hashedPassword = await bcrypt.hash(password, salt); 
+
+        // 3. Naya user banayein
         const user = await User.create({
             name,
             email,
-            password,
+            password: password,
         });
 
-        // 3. Agar user ban gaya, to success response bhejein
+        // 4. Agar user ban gaya, to success response bhejein
         if (user) {
+            // User bante hi token bhi banao aur bhejo
+            const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: '1d' });
+
             res.status(201).json({
                 _id: user._id,
                 name: user.name,
                 email: user.email,
-                message: 'User registered successfully!'
+                token: token, // Token bhi saath mein bhejo
             });
-        } else {
+        }else {
             res.status(400).json({ message: 'Invalid user data' });
         }
     } catch (error) {
@@ -43,29 +50,39 @@ const registerUser = async (req, res) => {
 const loginUser = async (req, res) => {
     try {
         const { email, password } = req.body;
+        console.log("\n--- NEW LOGIN ATTEMPT ---");
+        console.log("1. User ne email aur password daala:", { email, password });
 
-        // 1. Find the user by email in the database
         const user = await User.findOne({ email });
 
-        // 2. If user exists, compare the provided password with the stored hashed password
-        if (user && (await bcrypt.compare(password, user.password))) {
-            // Passwords match! Create a token.
-            const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
-                expiresIn: '30d', // Token expires in 30 days
-            });
+        if (!user) {
+            console.log("RESULT: User database mein nahi mila!");
+            return res.status(401).json({ message: 'Invalid email or password' });
+        }
 
-            // 3. Send back user info and the token
-            res.status(200).json({
+        console.log("!!!! DATABASE FOUND THIS USER OBJECT !!!!:", user);
+
+
+        console.log("2. Database se user mila. Uska saved password (hash) hai:", user.password);
+
+        const isMatch = await bcrypt.compare(password, user.password);
+        console.log("3. Password compare karne ka result (isMatch):", isMatch, "<-- YEH SABSE ZAROORI HAI");
+
+        if (isMatch) {
+            console.log("RESULT: Password match ho gaya! Token bhej rahe hain.");
+            const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: '30d' });
+            return res.status(200).json({
                 _id: user._id,
                 name: user.name,
                 email: user.email,
                 token: token,
             });
         } else {
-            // User not found or password doesn't match
-            res.status(401).json({ message: 'Invalid email or password' });
+            console.log("RESULT: Password match nahi hua! Error bhej rahe hain.");
+            return res.status(401).json({ message: 'Invalid email or password' });
         }
     } catch (error) {
+        console.error("SERVER ERROR:", error);
         res.status(500).json({ message: `Server Error: ${error.message}` });
     }
 };

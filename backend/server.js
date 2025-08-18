@@ -5,6 +5,7 @@ require('dotenv').config(); // Step 1: Sabse pehle .env ko load karein
 const express = require('express');
 const mongoose = require('mongoose');
 const morgan = require('morgan');
+const cors = require('cors');
 
 // Saare routes ko import karein
 const authRoute = require('./routes/authRoute.js');
@@ -19,6 +20,7 @@ const taskRoute = require('./routes/taskRoute.js');
 
 // Step 2: Express app ko banayein
 const app = express();
+app.use(cors());
 app.use(morgan('dev'));
 
 // Step 3: Middleware ko routes se PEHLE use karein

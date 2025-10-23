@@ -96,37 +96,37 @@ export default function Auth() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-900 flex items-center justify-center p-4">
+    <div className="min-h-screen gradient-bg flex items-center justify-center p-4 relative overflow-hidden">
       <Head>
         <title>HackHub - Login</title>
       </Head>
 
-      <div className="card w-full max-w-md">
+      <div className="card w-full max-w-md pulse-glow">
         {/* Initial View */}
         {view === "initial" && (
           <div>
-            <h2 className="text-2xl font-bold text-center mb-2 text-slate-100">
+            <h2 className="text-display-sm font-display text-gradient-primary text-center mb-3 text-glow">
               Welcome to HackHub
             </h2>
-            <p className="text-center text-slate-400 mb-6">
+            <p className="text-body-lg font-body text-center text-slate-300 mb-8">
               The ultimate platform for hackathon collaboration.
             </p>
             <div className="space-y-4">
               <button
                 onClick={() => setView("login")}
-                className="w-full bg-slate-600 hover:bg-slate-700 text-white font-bold py-3 px-4 rounded-lg transition-colors"
+                className="w-full btn-secondary"
               >
                 Login
               </button>
               <button
                 onClick={() => setView("signup")}
-                className="w-full bg-sky-500 hover:bg-sky-600 text-white font-bold py-3 px-4 rounded-lg transition-colors"
+                className="w-full btn-primary"
               >
                 Create a New Team (Sign Up)
               </button>
               <button
                 onClick={() => setView("join")}
-                className="w-full border border-sky-500 text-sky-400 hover:bg-sky-900 font-bold py-3 px-4 rounded-lg transition-colors"
+                className="w-full btn-secondary border-sky-500/30 text-sky-400 hover:text-white"
               >
                 Join a Team with Code
               </button>
@@ -137,20 +137,18 @@ export default function Auth() {
         {/* Login View */}
         {view === "login" && (
           <div>
-            <h2 className="text-2xl font-bold text-center mb-6 text-slate-100">
+            <h2 className="text-heading-xl font-heading text-center mb-6 text-slate-100">
               Login
             </h2>
             {error && <p className="text-red-500 text-center mb-4">{error}</p>}
             <form onSubmit={handleLogin}>
               <div className="mb-4">
-                <label className="block text-sm font-medium mb-1 text-slate-300">
-                  Username
-                </label>
+                <label className="label-enhanced">Username</label>
                 <input
                   type="text"
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
-                  className="w-full bg-slate-700 border border-slate-600 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-sky-500 text-slate-100"
+                  className="w-full input-enhanced"
                   required
                 />
               </div>
@@ -169,7 +167,7 @@ export default function Auth() {
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full bg-sky-500 hover:bg-sky-600 text-white font-bold py-3 px-4 rounded-lg transition-colors"
+                className="w-full btn-primary"
               >
                 {loading ? "Logging in..." : "Login"}
               </button>

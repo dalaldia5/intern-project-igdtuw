@@ -52,6 +52,11 @@ type AppContextType = {
   // Project deadline
   deadline: Date | null;
   setDeadline: (date: Date | null) => void;
+
+  // Hackathon timer
+  hackathonEndTime: Date | null;
+  setHackathonEndTime: (date: Date | null) => void;
+  resetHackathonTimer: () => void;
 };
 
 const defaultContextValue: AppContextType = {
@@ -74,6 +79,9 @@ const defaultContextValue: AppContextType = {
   updateTask: () => {},
   deadline: null,
   setDeadline: () => {},
+  hackathonEndTime: null,
+  setHackathonEndTime: () => {},
+  resetHackathonTimer: () => {},
 };
 
 export const AppContext = createContext<AppContextType>(defaultContextValue);
@@ -133,6 +141,7 @@ export const AppProvider = ({ children }: AppProviderProps) => {
   const [deadline, setDeadline] = useState<Date | null>(
     new Date(Date.now() + 7 * 24 * 60 * 60 * 1000) // 7 days from now
   );
+  const [hackathonEndTime, setHackathonEndTime] = useState<Date | null>(null);
 
   // Initialize auth state from localStorage only on client-side
   useEffect(() => {
@@ -156,6 +165,28 @@ export const AppProvider = ({ children }: AppProviderProps) => {
       }
     }
   }, [isAuthenticated, isInitialized]);
+
+  // Initialize hackathon timer from localStorage or set default
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const storedEndTime = localStorage.getItem("hackathonEndTime");
+      if (storedEndTime) {
+        setHackathonEndTime(new Date(storedEndTime));
+      } else {
+        // Set default hackathon duration (48 hours from now)
+        const defaultEndTime = new Date(Date.now() + 48 * 60 * 60 * 1000);
+        setHackathonEndTime(defaultEndTime);
+        localStorage.setItem("hackathonEndTime", defaultEndTime.toISOString());
+      }
+    }
+  }, []);
+
+  // Update localStorage when hackathon end time changes
+  useEffect(() => {
+    if (hackathonEndTime && typeof window !== "undefined") {
+      localStorage.setItem("hackathonEndTime", hackathonEndTime.toISOString());
+    }
+  }, [hackathonEndTime]);
 
   const login = (username: string, password: string) => {
     // In a real app, you would validate credentials against an API
@@ -203,6 +234,14 @@ export const AppProvider = ({ children }: AppProviderProps) => {
     setTeamMembers((prevMembers) => [...prevMembers, newMember]);
   };
 
+  const resetHackathonTimer = () => {
+    const newEndTime = new Date(Date.now() + 48 * 60 * 60 * 1000); // 48 hours from now
+    setHackathonEndTime(newEndTime);
+    if (typeof window !== "undefined") {
+      localStorage.setItem("hackathonEndTime", newEndTime.toISOString());
+    }
+  };
+
   const value = {
     isAuthenticated,
     setIsAuthenticated,
@@ -223,6 +262,9 @@ export const AppProvider = ({ children }: AppProviderProps) => {
     updateTask,
     deadline,
     setDeadline,
+    hackathonEndTime,
+    setHackathonEndTime,
+    resetHackathonTimer,
   };
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;

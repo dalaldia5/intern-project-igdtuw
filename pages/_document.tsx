@@ -6,12 +6,37 @@ class MyDocument extends Document {
     return (
       <Html lang="en">
         <Head>
+          {/* Font Preloading for Performance */}
+          <link rel="preconnect" href="https://fonts.googleapis.com" />
           <link
-            href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+            rel="preconnect"
+            href="https://fonts.gstatic.com"
+            crossOrigin="anonymous"
+          />
+
+          {/* Premium Font Imports */}
+          <link
+            href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap"
             rel="stylesheet"
           />
+          <link
+            href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&display=swap"
+            rel="stylesheet"
+          />
+          <link
+            href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700&display=swap"
+            rel="stylesheet"
+          />
+          <link
+            href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&display=swap"
+            rel="stylesheet"
+          />
+
+          {/* Meta tags for better rendering */}
+          <meta name="color-scheme" content="dark" />
+          <meta name="theme-color" content="#0f172a" />
         </Head>
-        <body className="bg-slate-900">
+        <body className="font-body antialiased">
           <Main />
           <NextScript />
         </body>

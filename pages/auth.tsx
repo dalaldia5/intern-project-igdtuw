@@ -137,7 +137,6 @@ export default function Auth() {
                   className="w-full group relative overflow-hidden bg-slate-700/50 hover:bg-slate-600/50 text-white font-semibold py-4 px-6 rounded-xl border border-slate-600/50 hover:border-slate-500/50 transition-all duration-300"
                 >
                   <div className="flex items-center justify-center">
-                    <span className="mr-3 text-xl">🔑</span>
                     <span>Login to Existing Account</span>
                   </div>
                 </button>
@@ -147,7 +146,6 @@ export default function Auth() {
                   className="w-full group relative overflow-hidden bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 text-white font-semibold py-4 px-6 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105"
                 >
                   <div className="flex items-center justify-center">
-                    <span className="mr-3 text-xl">✨</span>
                     <span>Create New Team</span>
                   </div>
                 </button>
@@ -157,7 +155,6 @@ export default function Auth() {
                   className="w-full group relative overflow-hidden bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-500 hover:to-cyan-500 text-white font-semibold py-4 px-6 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105"
                 >
                   <div className="flex items-center justify-center">
-                    <span className="mr-3 text-xl">🤝</span>
                     <span>Join Team with Code</span>
                   </div>
                 </button>

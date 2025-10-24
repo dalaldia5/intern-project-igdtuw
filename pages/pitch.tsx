@@ -97,7 +97,7 @@ Join the future of hackathon collaboration with HackHub - where great ideas meet
                 : "btn-primary"
             }`}
           >
-            {isGenerating ? "Generating..." : "✨ Generate Pitch"}
+            {isGenerating ? "Generating..." : "Generate Pitch"}
           </button>
         </div>
         <div className="card">

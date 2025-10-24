@@ -113,7 +113,7 @@ export default function Chat() {
         <div className="flex justify-between items-center border-b border-zinc-700 pb-3 mb-4">
           <h3 className="text-heading-lg font-heading">#general</h3>
           <button onClick={summarizeChat} className="btn-primary text-sm">
-            ✨ Summarize Chat
+            Summarize Chat
           </button>
         </div>
         <div className="flex-1 overflow-y-auto space-y-4 pr-2">

@@ -111,14 +111,14 @@ export default function TeamSetup() {
   // Show loading state while checking auth
   if (isCheckingAuth) {
     return (
-      <div className="min-h-screen bg-slate-900 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-sky-500"></div>
+      <div className="min-h-screen dark-theme-background flex items-center justify-center">
+        <div className="loader"></div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-slate-900 flex items-center justify-center p-4">
+    <div className="min-h-screen dark-theme-background flex items-center justify-center p-4">
       <Head>
         <title>HackHub - Team Setup</title>
       </Head>
@@ -126,59 +126,51 @@ export default function TeamSetup() {
       <div className="max-w-2xl mx-auto w-full">
         {!success ? (
           <div className="card">
-            <h2 className="text-3xl font-bold mb-2 text-center text-slate-100">
+            <h2 className="text-display-md font-display text-gradient-primary mb-2 text-center text-glow">
               Setup Your Team
             </h2>
-            <p className="text-slate-400 mb-6 text-center">
+            <p className="text-body-sm font-body text-zinc-400 mb-6 text-center">
               As the team leader, please add your team members below.
             </p>
 
             <form onSubmit={handleSubmit}>
               <div className="mb-4">
-                <label className="text-sm font-medium text-slate-300">
-                  Team Name
-                </label>
+                <label className="label-enhanced">Team Name</label>
                 <input
                   type="text"
                   value={teamName}
                   onChange={(e) => setTeamName(e.target.value)}
                   placeholder="e.g., The Code Crusaders"
-                  className="w-full mt-1 bg-slate-700 border border-slate-600 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-sky-500 text-slate-100"
+                  className="input-enhanced w-full mt-1 placeholder-enhanced"
                   required
                 />
               </div>
 
               <div className="mb-4">
-                <label className="text-sm font-medium text-slate-300">
-                  Team Bio
-                </label>
+                <label className="label-enhanced">Team Bio</label>
                 <textarea
                   value={teamBio}
                   onChange={(e) => setTeamBio(e.target.value)}
                   placeholder="Brief description of your team"
-                  className="w-full mt-1 bg-slate-700 border border-slate-600 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-sky-500 text-slate-100"
+                  className="input-enhanced w-full mt-1 placeholder-enhanced"
                   rows={3}
                   required
                 />
               </div>
 
               <div className="mb-4">
-                <label className="text-sm font-medium text-slate-300">
-                  Hackathon Deadline
-                </label>
+                <label className="label-enhanced">Hackathon Deadline</label>
                 <input
                   type="datetime-local"
                   value={deadline}
                   onChange={(e) => setDeadline(e.target.value)}
-                  className="w-full mt-1 bg-slate-700 border border-slate-600 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-sky-500 text-slate-100"
+                  className="input-enhanced w-full mt-1"
                   required
                 />
               </div>
 
               <div className="space-y-3 mb-4">
-                <label className="text-sm font-medium text-slate-300">
-                  Team Members
-                </label>
+                <label className="label-enhanced">Team Members</label>
                 {members.map((member, index) => (
                   <div key={index} className="flex gap-2">
                     <input
@@ -188,7 +180,7 @@ export default function TeamSetup() {
                         updateMember(index, "name", e.target.value)
                       }
                       placeholder={`Member ${index + 1} Name`}
-                      className="w-1/2 bg-slate-900 border border-slate-600 rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-sky-500 text-slate-100"
+                      className="input-enhanced w-1/2 placeholder-enhanced"
                       required={index === 0}
                     />
                     <select
@@ -196,7 +188,7 @@ export default function TeamSetup() {
                       onChange={(e) =>
                         updateMember(index, "role", e.target.value)
                       }
-                      className="w-1/2 bg-slate-900 border border-slate-600 rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-sky-500 text-slate-100"
+                      className="input-enhanced w-1/2"
                       required={index === 0}
                     >
                       <option value="" disabled>
@@ -215,7 +207,7 @@ export default function TeamSetup() {
               <button
                 type="button"
                 onClick={addMemberInput}
-                className="w-full mb-4 bg-slate-600 hover:bg-slate-700 text-white font-bold py-2 px-4 rounded-lg transition-colors text-sm"
+                className="w-full mb-4 btn-secondary text-sm"
               >
                 Add Another Member
               </button>
@@ -223,27 +215,30 @@ export default function TeamSetup() {
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full bg-sky-500 hover:bg-sky-600 text-white font-bold py-3 px-4 rounded-lg transition-colors"
+                className={`w-full ${
+                  loading
+                    ? "btn-secondary opacity-50 cursor-not-allowed"
+                    : "btn-primary"
+                }`}
               >
                 {loading ? "Creating Team..." : "Create Team & Generate Code"}
               </button>
             </form>
           </div>
         ) : (
-          <div className="card text-center">
-            <h2 className="text-3xl font-bold mb-2 text-green-400">
+          <div className="vibrant-card text-center">
+            <h2 className="text-display-sm font-display text-gradient-accent mb-2">
               Team Created!
             </h2>
-            <p className="text-slate-400 mb-4">
+            <p className="text-body-sm font-body text-zinc-400 mb-4">
               Share this code with your team members to join.
             </p>
-            <div className="bg-slate-900 border-2 border-dashed border-sky-400 rounded-lg p-4 mb-6">
-              <p className="text-4xl font-mono tracking-widest">{inviteCode}</p>
+            <div className="glass border-2 border-dashed border-cyan-400 rounded-xl p-4 mb-6">
+              <p className="text-display-sm font-mono tracking-widest text-gradient-primary">
+                {inviteCode}
+              </p>
             </div>
-            <button
-              onClick={enterDashboard}
-              className="w-full bg-sky-500 hover:bg-sky-600 text-white font-bold py-3 px-4 rounded-lg transition-colors"
-            >
+            <button onClick={enterDashboard} className="w-full btn-primary">
               Enter Dashboard
             </button>
           </div>

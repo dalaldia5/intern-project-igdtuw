@@ -100,20 +100,19 @@ export default function Chat() {
 
   return (
     <Layout>
-      <h2 className="text-3xl font-bold mb-2">Team Chat</h2>
-      <p className="text-slate-400 mb-6 max-w-3xl">
+      <h2 className="text-display-md font-display text-gradient-primary mb-2 text-glow">
+        Team Chat
+      </h2>
+      <p className="text-body-sm font-body text-zinc-400 mb-6 max-w-3xl">
         This is your central communication hub. All team chat happens here in
         real-time. If you need a quick catch-up on the conversation, use the
         'Summarize Chat with AI' button to get a condensed overview of recent
         discussions.
       </p>
       <div className="card h-[70vh] flex flex-col">
-        <div className="flex justify-between items-center border-b border-slate-700 pb-3 mb-4">
-          <h3 className="font-semibold">#general</h3>
-          <button
-            onClick={summarizeChat}
-            className="bg-sky-500 hover:bg-sky-600 text-white font-bold py-2 px-4 rounded-lg transition-colors text-sm"
-          >
+        <div className="flex justify-between items-center border-b border-zinc-700 pb-3 mb-4">
+          <h3 className="text-heading-lg font-heading">#general</h3>
+          <button onClick={summarizeChat} className="btn-primary text-sm">
             ✨ Summarize Chat
           </button>
         </div>
@@ -129,16 +128,18 @@ export default function Chat() {
                 alt={message.author}
               />
               <div>
-                <p className="font-semibold">
+                <p className="text-heading-sm font-heading">
                   {message.author}
-                  <span className="text-xs text-slate-500 ml-2">
+                  <span className="text-caption text-zinc-500 ml-2">
                     {message.time}
                   </span>
                 </p>
                 <div
                   className={`${
-                    message.isCurrentUser ? "bg-sky-600" : "bg-slate-700"
-                  } p-3 rounded-lg mt-1 inline-block message-text`}
+                    message.isCurrentUser
+                      ? "glass bg-gradient-to-r from-purple-600/20 to-pink-600/20"
+                      : "glass"
+                  } p-3 rounded-xl mt-1 inline-block message-text`}
                 >
                   {message.text}
                 </div>
@@ -148,14 +149,14 @@ export default function Chat() {
         </div>
         <form
           onSubmit={handleSendMessage}
-          className="mt-4 pt-4 border-t border-slate-700"
+          className="mt-4 pt-4 border-t border-zinc-700"
         >
           <input
             type="text"
             placeholder="Type your message..."
             value={newMessage}
             onChange={(e) => setNewMessage(e.target.value)}
-            className="w-full bg-slate-700 border border-slate-600 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-sky-500"
+            className="input-enhanced w-full placeholder-enhanced"
           />
         </form>
       </div>
@@ -164,9 +165,11 @@ export default function Chat() {
       {showSummaryModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 modal-backdrop">
           <div className="card w-full max-w-2xl">
-            <h2 className="text-2xl font-bold mb-4">✨ AI Chat Summary</h2>
+            <h2 className="text-heading-xl font-heading mb-4">
+              ✨ AI Chat Summary
+            </h2>
             <div
-              className="text-slate-300 max-h-[60vh] overflow-y-auto pr-2"
+              className="text-body-md font-body text-zinc-300 max-h-[60vh] overflow-y-auto pr-2"
               dangerouslySetInnerHTML={{
                 __html: isGeneratingSummary
                   ? "<p>Generating summary...</p>"
@@ -175,7 +178,7 @@ export default function Chat() {
             />
             <button
               onClick={() => setShowSummaryModal(false)}
-              className="w-full mt-6 bg-sky-500 hover:bg-sky-600 text-white font-bold py-2 px-4 rounded-lg transition-colors"
+              className="w-full mt-6 btn-primary"
             >
               Close
             </button>

@@ -68,8 +68,10 @@ Join the future of hackathon collaboration with HackHub - where great ideas meet
 
   return (
     <Layout>
-      <h2 className="text-3xl font-bold mb-2">AI Pitch Generator</h2>
-      <p className="text-slate-400 mb-6 max-w-3xl">
+      <h2 className="text-display-md font-display text-gradient-primary mb-2 text-glow">
+        AI Pitch Generator
+      </h2>
+      <p className="text-body-sm font-body text-zinc-400 mb-6 max-w-3xl">
         Struggling to articulate your project's vision? Simply enter your core
         ideas as bullet points in the text area below. Our AI assistant will
         analyze them and generate a concise, compelling summary perfect for your
@@ -77,36 +79,40 @@ Join the future of hackathon collaboration with HackHub - where great ideas meet
       </p>
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <div className="card">
-          <h3 className="font-semibold text-lg mb-4">Your Bullet Points</h3>
+          <h3 className="text-heading-lg font-heading mb-4">
+            Your Bullet Points
+          </h3>
           <textarea
             value={pitchInput}
             onChange={(e) => setPitchInput(e.target.value)}
-            className="w-full h-64 bg-slate-900 border border-slate-700 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-sky-500 text-sm"
+            className="input-enhanced w-full h-64 text-body-sm font-mono placeholder-enhanced"
             placeholder="- AI-powered collaboration hub&#x0a;- Real-time task tracking&#x0a;- Automated pitch generation&#x0a;- Centralized file storage"
           ></textarea>
           <button
             onClick={generatePitch}
             disabled={isGenerating}
             className={`w-full mt-4 ${
-              isGenerating ? "bg-slate-600" : "bg-sky-500 hover:bg-sky-600"
-            } text-white font-bold py-2 px-4 rounded-lg transition-colors`}
+              isGenerating
+                ? "btn-secondary opacity-50 cursor-not-allowed"
+                : "btn-primary"
+            }`}
           >
             {isGenerating ? "Generating..." : "✨ Generate Pitch"}
           </button>
         </div>
         <div className="card">
-          <h3 className="font-semibold text-lg mb-4">
+          <h3 className="text-heading-lg font-heading mb-4">
             Generated Pitch Summary
           </h3>
-          <div className="w-full h-64 bg-slate-900 border border-dashed border-slate-600 rounded-lg p-4 text-sm text-slate-400 overflow-y-auto whitespace-pre-line">
+          <div className="w-full h-64 glass rounded-xl border border-dashed border-zinc-600 p-4 text-body-sm font-body text-zinc-400 overflow-y-auto whitespace-pre-line">
             {pitchOutput}
           </div>
           {showAssistant && (
             <div className="mt-4">
-              <h4 className="font-semibold text-md mb-2">
+              <h4 className="text-heading-md font-heading mb-2">
                 AI Assistant Suggestion
               </h4>
-              <p className="text-sm bg-slate-900 p-3 rounded-lg border border-slate-700 whitespace-pre-line">
+              <p className="text-body-sm font-body glass p-3 rounded-xl border border-zinc-700 whitespace-pre-line">
                 {assistantOutput}
               </p>
               <button
@@ -114,9 +120,9 @@ Join the future of hackathon collaboration with HackHub - where great ideas meet
                 disabled={isGeneratingImprovements}
                 className={`w-full mt-2 ${
                   isGeneratingImprovements
-                    ? "bg-slate-700"
-                    : "bg-slate-600 hover:bg-slate-700"
-                } text-white font-bold py-2 px-4 rounded-lg transition-colors text-sm`}
+                    ? "btn-secondary opacity-50 cursor-not-allowed"
+                    : "btn-secondary"
+                } text-sm`}
               >
                 {isGeneratingImprovements
                   ? "Analyzing..."

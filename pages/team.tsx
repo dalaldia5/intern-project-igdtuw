@@ -83,73 +83,66 @@ export default function Team() {
 
   return (
     <Layout>
-      <h2 className="text-3xl font-bold mb-6">Team Settings</h2>
-      <p className="text-slate-400 mb-6 max-w-3xl">
+      <h2 className="text-display-md font-display text-gradient-primary mb-6 text-glow">
+        Team Settings
+      </h2>
+      <p className="text-body-sm font-body text-zinc-400 mb-6 max-w-3xl">
         Manage your team's identity and member roles here. You can update the
         team bio that appears on the dashboard and assign specific roles to each
         member to clarify responsibilities. Your unique invite code is also
         available here to share with new members.
       </p>
       <div className="card mb-6">
-        <h3 className="font-semibold text-lg mb-4">Team Profile</h3>
+        <h3 className="text-heading-lg font-heading mb-4">Team Profile</h3>
         <div className="space-y-4">
           <div>
-            <label className="text-sm font-medium text-slate-400">
-              Team Name
-            </label>
+            <label className="label-enhanced">Team Name</label>
             <input
               type="text"
               value={teamName}
               onChange={(e) => setTeamName(e.target.value)}
-              className="w-full mt-1 bg-slate-700 border border-slate-600 rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-sky-500"
+              className="input-enhanced w-full mt-1"
             />
           </div>
           <div>
-            <label className="text-sm font-medium text-slate-400">
-              Team Bio
-            </label>
+            <label className="label-enhanced">Team Bio</label>
             <textarea
               value={teamBio}
               onChange={(e) => setTeamBio(e.target.value)}
-              className="w-full mt-1 h-24 bg-slate-700 border border-slate-600 rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-sky-500"
+              className="input-enhanced w-full mt-1 h-24"
             />
           </div>
           <div>
-            <label className="text-sm font-medium text-slate-400">
-              Team Invite Code
-            </label>
+            <label className="label-enhanced">Team Invite Code</label>
             <div className="flex items-center gap-2 mt-1">
               <input
                 type="text"
                 readOnly
                 value={inviteCode}
-                className="w-full bg-slate-900 border border-slate-600 rounded-lg p-2 font-mono"
+                className="input-enhanced w-full font-mono"
               />
               <button
                 onClick={copyInviteCode}
-                className="bg-slate-600 hover:bg-slate-700 text-white font-bold py-2 px-4 rounded-lg transition-colors text-sm"
+                className="btn-secondary text-sm px-4 py-2"
               >
                 Copy
               </button>
             </div>
           </div>
           <div className="pt-4">
-            <button
-              onClick={saveTeamProfile}
-              className="bg-sky-500 hover:bg-sky-600 text-white font-bold py-2 px-4 rounded-lg transition-colors"
-            >
+            <button onClick={saveTeamProfile} className="btn-primary">
               Save Changes
             </button>
           </div>
         </div>
       </div>
       <div className="card">
-        <h3 className="font-semibold text-lg mb-4">Manage Members</h3>
+        <h3 className="text-heading-lg font-heading mb-4">Manage Members</h3>
         <div className="space-y-3">
           {members.map((member) => (
             <div
               key={member.id}
-              className="flex justify-between items-center p-3 bg-slate-900 rounded-lg"
+              className="glass rounded-xl flex justify-between items-center p-3 transition-all duration-300 hover:scale-[1.02]"
             >
               <div className="flex items-center gap-3">
                 <img
@@ -157,13 +150,15 @@ export default function Team() {
                   className="w-10 h-10 rounded-full"
                   alt={member.name}
                 />
-                <p className="font-semibold">{member.name}</p>
+                <p className="text-heading-sm font-heading">{member.name}</p>
               </div>
               <div className="flex items-center gap-3">
-                <span className="text-sm text-slate-400">{member.role}</span>
+                <span className="text-body-sm font-body text-zinc-400">
+                  {member.role}
+                </span>
                 <button
                   onClick={() => openEditMemberModal(member)}
-                  className="text-xs bg-slate-700 hover:bg-slate-600 text-white py-1 px-2 rounded-md"
+                  className="text-xs btn-secondary py-1 px-2"
                 >
                   Edit
                 </button>
@@ -177,28 +172,26 @@ export default function Team() {
       {showEditMemberModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 modal-backdrop">
           <div className="card w-full max-w-md">
-            <h2 className="text-2xl font-bold mb-6">Edit Team Member</h2>
+            <h2 className="text-heading-xl font-heading mb-6">
+              Edit Team Member
+            </h2>
             <div>
               <div className="mb-4">
-                <label className="block text-sm font-medium mb-1 text-slate-400">
-                  Name
-                </label>
+                <label className="label-enhanced">Name</label>
                 <input
                   type="text"
                   value={editMemberName}
                   onChange={(e) => setEditMemberName(e.target.value)}
-                  className="w-full bg-slate-700 border border-slate-600 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-sky-500"
+                  className="input-enhanced w-full"
                   required
                 />
               </div>
               <div className="mb-6">
-                <label className="block text-sm font-medium mb-1 text-slate-400">
-                  Role
-                </label>
+                <label className="label-enhanced">Role</label>
                 <select
                   value={editMemberRole}
                   onChange={(e) => setEditMemberRole(e.target.value)}
-                  className="w-full bg-slate-700 border border-slate-600 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-sky-500"
+                  className="input-enhanced w-full"
                   required
                 >
                   <option value="Leader">Leader</option>
@@ -212,14 +205,14 @@ export default function Team() {
                 <button
                   type="button"
                   onClick={closeEditMemberModal}
-                  className="w-full bg-slate-600 hover:bg-slate-700 text-white font-bold py-3 px-4 rounded-lg transition-colors"
+                  className="w-full btn-secondary"
                 >
                   Cancel
                 </button>
                 <button
                   type="button"
                   onClick={updateMember}
-                  className="w-full bg-sky-500 hover:bg-sky-600 text-white font-bold py-3 px-4 rounded-lg transition-colors"
+                  className="w-full btn-primary"
                 >
                   Save Changes
                 </button>

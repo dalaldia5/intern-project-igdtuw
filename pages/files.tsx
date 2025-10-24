@@ -74,8 +74,10 @@ export default function Files() {
 
   return (
     <Layout>
-      <h2 className="text-3xl font-bold mb-6">Files & Links</h2>
-      <p className="text-slate-400 mb-6 max-w-3xl">
+      <h2 className="text-display-md font-display text-gradient-primary mb-6 text-glow">
+        Files & Links
+      </h2>
+      <p className="text-body-sm font-body text-zinc-400 mb-6 max-w-3xl">
         This section is your team's shared repository. Upload important
         documents, presentations, and whiteboard snapshots. You can also save
         and share crucial web links, ensuring everyone has access to the same
@@ -83,11 +85,8 @@ export default function Files() {
       </p>
       <div className="card mb-6">
         <div className="flex justify-between items-center mb-4">
-          <h3 className="font-semibold text-lg">Uploaded Files</h3>
-          <button
-            onClick={handleFileUpload}
-            className="bg-sky-500 hover:bg-sky-600 text-white font-bold py-2 px-4 rounded-lg transition-colors text-sm"
-          >
+          <h3 className="text-heading-lg font-heading">Uploaded Files</h3>
+          <button onClick={handleFileUpload} className="btn-primary text-sm">
             Upload File
           </button>
         </div>
@@ -95,21 +94,22 @@ export default function Files() {
           {files.map((file) => (
             <div
               key={file.id}
-              className="p-3 bg-slate-900 rounded-lg text-center"
+              className="glass rounded-xl p-3 text-center transition-all duration-300 hover:scale-105"
             >
               <span className="text-4xl">{file.icon}</span>
-              <p className="text-sm mt-2 truncate">{file.name}</p>
+              <p className="text-body-sm font-body mt-2 truncate">
+                {file.name}
+              </p>
             </div>
           ))}
         </div>
       </div>
       <div className="card">
         <div className="flex justify-between items-center mb-4">
-          <h3 className="font-semibold text-lg">Saved Important Links</h3>
-          <button
-            onClick={openAddLinkModal}
-            className="bg-sky-500 hover:bg-sky-600 text-white font-bold py-2 px-4 rounded-lg transition-colors text-sm"
-          >
+          <h3 className="text-heading-lg font-heading">
+            Saved Important Links
+          </h3>
+          <button onClick={openAddLinkModal} className="btn-primary text-sm">
             Add Link
           </button>
         </div>
@@ -117,17 +117,19 @@ export default function Files() {
           {links.map((link) => (
             <li
               key={link.id}
-              className="flex items-center justify-between p-3 bg-slate-900 rounded-lg"
+              className="glass rounded-xl flex items-center justify-between p-3 transition-all duration-300 hover:scale-[1.02]"
             >
               <a
                 href={link.url}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-sky-400 hover:underline truncate"
+                className="text-gradient-primary hover:underline truncate"
               >
                 {link.title}
               </a>
-              <span className="text-xs text-slate-500">{link.category}</span>
+              <span className="text-caption text-zinc-500">
+                {link.category}
+              </span>
             </li>
           ))}
         </ul>
@@ -137,43 +139,37 @@ export default function Files() {
       {showAddLinkModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 modal-backdrop">
           <div className="card w-full max-w-md">
-            <h2 className="text-2xl font-bold mb-6">Add New Link</h2>
+            <h2 className="text-heading-xl font-heading mb-6">Add New Link</h2>
             <div>
               <div className="mb-4">
-                <label className="block text-sm font-medium mb-1 text-slate-400">
-                  Link Title
-                </label>
+                <label className="label-enhanced">Link Title</label>
                 <input
                   type="text"
                   value={newLinkTitle}
                   onChange={(e) => setNewLinkTitle(e.target.value)}
-                  className="w-full bg-slate-700 border border-slate-600 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-sky-500"
+                  className="input-enhanced w-full placeholder-enhanced"
                   placeholder="e.g., API Documentation"
                   required
                 />
               </div>
               <div className="mb-4">
-                <label className="block text-sm font-medium mb-1 text-slate-400">
-                  URL
-                </label>
+                <label className="label-enhanced">URL</label>
                 <input
                   type="url"
                   value={newLinkUrl}
                   onChange={(e) => setNewLinkUrl(e.target.value)}
-                  className="w-full bg-slate-700 border border-slate-600 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-sky-500"
+                  className="input-enhanced w-full placeholder-enhanced"
                   placeholder="https://..."
                   required
                 />
               </div>
               <div className="mb-6">
-                <label className="block text-sm font-medium mb-1 text-slate-400">
-                  Category
-                </label>
+                <label className="label-enhanced">Category</label>
                 <input
                   type="text"
                   value={newLinkCategory}
                   onChange={(e) => setNewLinkCategory(e.target.value)}
-                  className="w-full bg-slate-700 border border-slate-600 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-sky-500"
+                  className="input-enhanced w-full placeholder-enhanced"
                   placeholder="e.g., Design, Backend, Reference"
                 />
               </div>
@@ -181,14 +177,14 @@ export default function Files() {
                 <button
                   type="button"
                   onClick={closeAddLinkModal}
-                  className="w-full bg-slate-600 hover:bg-slate-700 text-white font-bold py-3 px-4 rounded-lg transition-colors"
+                  className="w-full btn-secondary"
                 >
                   Cancel
                 </button>
                 <button
                   type="button"
                   onClick={addLink}
-                  className="w-full bg-sky-500 hover:bg-sky-600 text-white font-bold py-3 px-4 rounded-lg transition-colors"
+                  className="w-full btn-primary"
                 >
                   Add Link
                 </button>

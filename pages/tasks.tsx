@@ -93,7 +93,7 @@ export default function Tasks() {
   // Show loading state while checking authentication
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-slate-900 flex items-center justify-center">
+      <div className="min-h-screen dark-theme-background flex items-center justify-center">
         <div className="loader"></div>
       </div>
     );
@@ -107,15 +107,14 @@ export default function Tasks() {
   return (
     <Layout>
       <div className="flex justify-between items-center mb-6">
-        <h2 className="text-3xl font-bold">Task Board</h2>
-        <button
-          onClick={openAddTaskModal}
-          className="bg-sky-500 hover:bg-sky-600 text-white font-bold py-2 px-4 rounded-lg transition-colors"
-        >
+        <h2 className="text-display-md font-display text-gradient-primary mb-2 text-glow">
+          Task Board
+        </h2>
+        <button onClick={openAddTaskModal} className="btn-primary">
           Add New Task
         </button>
       </div>
-      <p className="text-slate-400 mb-6 max-w-3xl">
+      <p className="text-body-sm font-body text-zinc-400 mb-6 max-w-3xl">
         This is your team's Kanban board. It provides a clear overview of all
         tasks and their current status. Click the 'Update Status' button on any
         task card to move it to a different column, helping everyone stay
@@ -123,82 +122,93 @@ export default function Tasks() {
       </p>
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {/* To Do */}
-        <div className="bg-slate-800 p-4 rounded-lg">
-          <h3 className="font-semibold text-lg mb-4 text-center text-red-400">
+        <div className="card">
+          <h3 className="text-heading-lg font-heading mb-4 text-center text-rose-400">
             To Do
           </h3>
           <div className="space-y-4 min-h-[100px]">
             {todoTasks.length > 0 ? (
               todoTasks.map((task) => (
-                <div key={task.id} className="card p-4">
-                  <p className="font-semibold">{task.title}</p>
-                  <p className="text-sm text-slate-400 mt-1">
+                <div
+                  key={task.id}
+                  className="glass rounded-xl p-4 transition-all duration-300"
+                >
+                  <p className="text-heading-sm font-heading">{task.title}</p>
+                  <p className="text-body-sm font-body text-zinc-400 mt-1">
                     Assigned to: {task.assignee}
                   </p>
                   <button
                     onClick={() => openUpdateTaskModal(task.id)}
-                    className="text-xs mt-3 bg-slate-600 hover:bg-slate-700 text-white py-1 px-3 rounded-md"
+                    className="text-xs mt-3 btn-secondary py-1 px-3"
                   >
                     Update Status
                   </button>
                 </div>
               ))
             ) : (
-              <p className="text-slate-400 text-center py-4">No tasks to do</p>
+              <p className="text-zinc-400 text-center py-4">No tasks to do</p>
             )}
           </div>
         </div>
         {/* In Progress */}
-        <div className="bg-slate-800 p-4 rounded-lg">
-          <h3 className="font-semibold text-lg mb-4 text-center text-yellow-400">
+        <div className="card">
+          <h3 className="text-heading-lg font-heading mb-4 text-center text-amber-400">
             In Progress
           </h3>
           <div className="space-y-4 min-h-[100px]">
             {inProgressTasks.length > 0 ? (
               inProgressTasks.map((task) => (
-                <div key={task.id} className="card p-4">
-                  <p className="font-semibold">{task.title}</p>
-                  <p className="text-sm text-slate-400 mt-1">
+                <div
+                  key={task.id}
+                  className="glass rounded-xl p-4 transition-all duration-300"
+                >
+                  <p className="text-heading-sm font-heading">{task.title}</p>
+                  <p className="text-body-sm font-body text-zinc-400 mt-1">
                     Assigned to: {task.assignee}
                   </p>
                   <button
                     onClick={() => openUpdateTaskModal(task.id)}
-                    className="text-xs mt-3 bg-slate-600 hover:bg-slate-700 text-white py-1 px-3 rounded-md"
+                    className="text-xs mt-3 btn-secondary py-1 px-3"
                   >
                     Update Status
                   </button>
                 </div>
               ))
             ) : (
-              <p className="text-slate-400 text-center py-4">
+              <p className="text-zinc-400 text-center py-4">
                 No tasks in progress
               </p>
             )}
           </div>
         </div>
         {/* Done */}
-        <div className="bg-slate-800 p-4 rounded-lg">
-          <h3 className="font-semibold text-lg mb-4 text-center text-green-400">
+        <div className="card">
+          <h3 className="text-heading-lg font-heading mb-4 text-center text-emerald-400">
             Done
           </h3>
           <div className="space-y-4 min-h-[100px]">
             {doneTasks.length > 0 ? (
               doneTasks.map((task) => (
-                <div key={task.id} className="card p-4 opacity-70">
-                  <p className="font-semibold line-through">{task.title}</p>
-                  <p className="text-sm text-slate-400 mt-1">
+                <div
+                  key={task.id}
+                  className="glass rounded-xl p-4 opacity-70 transition-all duration-300"
+                >
+                  <p className="text-heading-sm font-heading line-through">
+                    {task.title}
+                  </p>
+                  <p className="text-body-sm font-body text-zinc-400 mt-1">
                     Assigned to: {task.assignee}
                   </p>
                   <button
                     onClick={() => openUpdateTaskModal(task.id)}
-                    className="text-xs mt-3 bg-slate-600 hover:bg-slate-700 text-white py-1 px-3 rounded-md"
+                    className="text-xs mt-3 btn-secondary py-1 px-3"
                   >
                     Update Status
                   </button>
                 </div>
               ))
             ) : (
-              <p className="text-slate-400 text-center py-4">
+              <p className="text-zinc-400 text-center py-4">
                 No completed tasks
               </p>
             )}
@@ -210,28 +220,24 @@ export default function Tasks() {
       {showAddTaskModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 modal-backdrop">
           <div className="card w-full max-w-lg">
-            <h2 className="text-2xl font-bold mb-6">Add New Task</h2>
+            <h2 className="text-heading-xl font-heading mb-6">Add New Task</h2>
             <div>
               <div className="mb-4">
-                <label className="block text-sm font-medium mb-1 text-slate-400">
-                  Task Title
-                </label>
+                <label className="label-enhanced">Task Title</label>
                 <input
                   type="text"
                   value={newTaskTitle}
                   onChange={(e) => setNewTaskTitle(e.target.value)}
-                  className="w-full bg-slate-700 border border-slate-600 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-sky-500"
+                  className="input-enhanced w-full"
                   required
                 />
               </div>
               <div className="mb-6">
-                <label className="block text-sm font-medium mb-1 text-slate-400">
-                  Assign To
-                </label>
+                <label className="label-enhanced">Assign To</label>
                 <select
                   value={newTaskAssignee}
                   onChange={(e) => setNewTaskAssignee(e.target.value)}
-                  className="w-full bg-slate-700 border border-slate-600 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-sky-500"
+                  className="input-enhanced w-full"
                   required
                 >
                   {teamMembers.map((member) => (
@@ -245,14 +251,14 @@ export default function Tasks() {
                 <button
                   type="button"
                   onClick={closeAddTaskModal}
-                  className="w-full bg-slate-600 hover:bg-slate-700 text-white font-bold py-3 px-4 rounded-lg transition-colors"
+                  className="w-full btn-secondary"
                 >
                   Cancel
                 </button>
                 <button
                   type="button"
                   onClick={handleAddTask}
-                  className="w-full bg-sky-500 hover:bg-sky-600 text-white font-bold py-3 px-4 rounded-lg transition-colors"
+                  className="w-full btn-primary"
                 >
                   Add Task
                 </button>
@@ -266,12 +272,12 @@ export default function Tasks() {
       {showUpdateTaskModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 modal-backdrop">
           <div className="card w-full max-w-sm">
-            <h2 className="text-2xl font-bold mb-6">Update Task Status</h2>
+            <h2 className="text-heading-xl font-heading mb-6">
+              Update Task Status
+            </h2>
             <div>
               <div className="mb-6">
-                <label className="block text-sm font-medium mb-1 text-slate-400">
-                  New Status
-                </label>
+                <label className="label-enhanced">New Status</label>
                 <select
                   value={newTaskStatus}
                   onChange={(e) =>
@@ -279,7 +285,7 @@ export default function Tasks() {
                       e.target.value as "To Do" | "In Progress" | "Done"
                     )
                   }
-                  className="w-full bg-slate-700 border border-slate-600 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-sky-500"
+                  className="input-enhanced w-full"
                   required
                 >
                   <option value="To Do">To Do</option>
@@ -291,14 +297,14 @@ export default function Tasks() {
                 <button
                   type="button"
                   onClick={closeUpdateTaskModal}
-                  className="w-full bg-slate-600 hover:bg-slate-700 text-white font-bold py-3 px-4 rounded-lg transition-colors"
+                  className="w-full btn-secondary"
                 >
                   Cancel
                 </button>
                 <button
                   type="button"
                   onClick={handleUpdateTaskStatus}
-                  className="w-full bg-sky-500 hover:bg-sky-600 text-white font-bold py-3 px-4 rounded-lg transition-colors"
+                  className="w-full btn-primary"
                 >
                   Update
                 </button>

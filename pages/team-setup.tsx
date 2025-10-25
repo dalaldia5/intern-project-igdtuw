@@ -6,7 +6,6 @@ import { useAppContext } from "../context/AppContext";
 export default function TeamSetup() {
   const router = useRouter();
   const {
-    isAuthenticated,
     setTeamName: updateTeamName,
     setTeamBio: updateTeamBio,
     setDeadline: updateDeadline,
@@ -165,8 +164,13 @@ export default function TeamSetup() {
                   value={deadline}
                   onChange={(e) => setDeadline(e.target.value)}
                   className="input-enhanced w-full mt-1"
+                  min={new Date().toISOString().slice(0, 16)} // Prevent past dates
                   required
                 />
+                <p className="text-caption text-zinc-500 mt-1">
+                  This will be your project deadline and hackathon countdown
+                  timer
+                </p>
               </div>
 
               <div className="space-y-3 mb-4">

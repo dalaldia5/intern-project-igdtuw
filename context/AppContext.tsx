@@ -170,7 +170,14 @@ export const AppProvider = ({ children }: AppProviderProps) => {
   useEffect(() => {
     if (typeof window !== "undefined") {
       const storedEndTime = localStorage.getItem("hackathonEndTime");
-      if (storedEndTime) {
+      const storedDeadline = localStorage.getItem("projectDeadline");
+
+      if (storedDeadline) {
+        // If we have a stored deadline, use it for both deadline and hackathon timer
+        const deadlineDate = new Date(storedDeadline);
+        setDeadline(deadlineDate);
+        setHackathonEndTime(deadlineDate);
+      } else if (storedEndTime) {
         setHackathonEndTime(new Date(storedEndTime));
       } else {
         // Set default hackathon duration (48 hours from now)
@@ -193,13 +200,15 @@ export const AppProvider = ({ children }: AppProviderProps) => {
     console.log(`Logging in with username: ${username}`);
 
     // Create a user based on the login info
+    const avatar = `https://placehold.co/200x200/1e293b/38bdf8?text=${username
+      .charAt(0)
+      .toUpperCase()}`;
+
     setCurrentUser({
       id: `user-${Date.now()}`,
       name: username,
       role: "Team Member",
-      avatar: `https://placehold.co/200x200/1e293b/38bdf8?text=${username
-        .charAt(0)
-        .toUpperCase()}`,
+      avatar,
     });
 
     setIsAuthenticated(true);
@@ -234,11 +243,26 @@ export const AppProvider = ({ children }: AppProviderProps) => {
     setTeamMembers((prevMembers) => [...prevMembers, newMember]);
   };
 
+  // Custom setDeadline function that syncs with hackathon timer
+  const updateDeadline = (date: Date | null) => {
+    setDeadline(date);
+    if (date) {
+      // Sync hackathon timer with deadline
+      setHackathonEndTime(date);
+      if (typeof window !== "undefined") {
+        localStorage.setItem("projectDeadline", date.toISOString());
+        localStorage.setItem("hackathonEndTime", date.toISOString());
+      }
+    }
+  };
+
   const resetHackathonTimer = () => {
     const newEndTime = new Date(Date.now() + 48 * 60 * 60 * 1000); // 48 hours from now
     setHackathonEndTime(newEndTime);
+    setDeadline(newEndTime); // Also update deadline
     if (typeof window !== "undefined") {
       localStorage.setItem("hackathonEndTime", newEndTime.toISOString());
+      localStorage.setItem("projectDeadline", newEndTime.toISOString());
     }
   };
 
@@ -261,7 +285,7 @@ export const AppProvider = ({ children }: AppProviderProps) => {
     addTask,
     updateTask,
     deadline,
-    setDeadline,
+    setDeadline: updateDeadline,
     hackathonEndTime,
     setHackathonEndTime,
     resetHackathonTimer,

@@ -569,8 +569,11 @@ export default function Dashboard() {
           <div>
             <div className="text-center">
               <h3 className="text-heading-lg font-heading mb-2 text-white">
-                Time Remaining
+                Project Deadline
               </h3>
+              <p className="text-caption text-gray-300 mb-4">
+                Time remaining until your hackathon deadline
+              </p>
 
               {hackathonTimeRemaining ? (
                 <div className="space-y-4">
@@ -638,13 +641,21 @@ export default function Dashboard() {
                     🎉
                   </div>
                   <p className="text-heading-md font-heading text-white">
-                    Hackathon Complete!
+                    Deadline Reached!
                   </p>
                   <p className="text-body-sm text-gray-200 mt-2">
                     Time to submit your project
                   </p>
-                  <div className="mt-4">
-                    <button className="btn-primary">Submit Project 🚀</button>
+                  <div className="mt-4 space-y-2">
+                    <button className="btn-primary w-full">
+                      Submit Project 🚀
+                    </button>
+                    <button
+                      onClick={() => router.push("/team-setup")}
+                      className="btn-secondary w-full text-sm"
+                    >
+                      Extend Deadline
+                    </button>
                   </div>
                 </div>
               )}

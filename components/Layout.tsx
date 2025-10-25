@@ -2,6 +2,7 @@ import React, { ReactNode, useState, useEffect } from "react";
 import { useRouter } from "next/router";
 import Link from "next/link";
 import { useAppContext } from "../context/AppContext";
+
 import {
   LayoutDashboard,
   CheckSquare,
@@ -19,7 +20,8 @@ interface LayoutProps {
 
 const Layout = ({ children }: LayoutProps) => {
   const router = useRouter();
-  const { logout } = useAppContext();
+
+  const { logout, currentUser } = useAppContext();
   const [isLoading, setIsLoading] = useState(true);
   const [isLocallyAuthenticated, setIsLocallyAuthenticated] = useState(false);
 
@@ -53,7 +55,7 @@ const Layout = ({ children }: LayoutProps) => {
     { name: "Pitch", href: "/pitch", icon: Mic },
     { name: "Team", href: "/team", icon: Users },
   ];
-  const handleLogout = () => {
+  const handleLogout = async () => {
     logout();
     localStorage.removeItem("isAuthenticated");
     router.push("/auth");
@@ -125,8 +127,12 @@ const Layout = ({ children }: LayoutProps) => {
                 👤
               </div>
               <div className="ml-3">
-                <p className="text-body-sm font-body text-white">User</p>
-                <p className="text-caption text-zinc-400">Team Member</p>
+                <p className="text-body-sm font-body text-white">
+                  {currentUser?.name || "User"}
+                </p>
+                <p className="text-caption text-zinc-400">
+                  {currentUser?.role || "Team Member"}
+                </p>
               </div>
             </div>
           </div>

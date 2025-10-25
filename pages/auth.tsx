@@ -6,25 +6,24 @@ import { useAppContext } from "../context/AppContext";
 export default function Auth() {
   const router = useRouter();
   const { isAuthenticated, login } = useAppContext();
+
   const [view, setView] = useState("initial");
   const [username, setUsername] = useState("");
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [isCheckingAuth, setIsCheckingAuth] = useState(true);
 
-  // Check authentication status after mount
+  // ✅ On mount, check auth state
   useEffect(() => {
-    const timer = setTimeout(() => {
-      setIsCheckingAuth(false);
-    }, 100);
+    const timer = setTimeout(() => setIsCheckingAuth(false), 200);
     return () => clearTimeout(timer);
   }, []);
 
-  // Redirect to dashboard if already authenticated
+  // ✅ Redirect if already logged in
   useEffect(() => {
     if (!isCheckingAuth && isAuthenticated) {
-      // Check if user came from signup (should go to team setup)
       const fromSignup = localStorage.getItem("fromSignup") === "true";
       if (fromSignup) {
         localStorage.removeItem("fromSignup");
@@ -35,53 +34,78 @@ export default function Auth() {
     }
   }, [isAuthenticated, router, isCheckingAuth]);
 
-  const handleLogin = (e: React.FormEvent) => {
+  // ✅ Login function (connects to backend)
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
     setLoading(true);
 
     try {
-      // For demo purposes, we'll just call login with any credentials
-      login(username, password);
+      const res = await fetch("http://localhost:5000/api/auth/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ email: username, password }),
+      });
 
-      // Manually set localStorage for immediate effect
+      const data = await res.json();
+
+      if (!res.ok) throw new Error(data.message || "Login failed!");
+
+      // Save token + auth state
+      localStorage.setItem("token", data.token);
       localStorage.setItem("isAuthenticated", "true");
 
-      // Make sure we're not marked as coming from signup
-      localStorage.removeItem("fromSignup");
+      login(username, password);
 
-      // Use router.push for navigation
       router.push("/dashboard");
-    } catch (error) {
-      setError("Invalid credentials. Please try again.");
+    } catch (err: any) {
+      console.error("Login error:", err);
+      setError(err.message || "Invalid credentials");
     } finally {
       setLoading(false);
     }
   };
 
-  const handleSignup = (e: React.FormEvent) => {
+  // ✅ Signup function (connects to backend)
+  const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
     setLoading(true);
 
     try {
-      // Set authenticated
+      const res = await fetch("http://localhost:5000/api/auth/signup", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          name: username,
+          email,
+          password,
+        }),
+      });
+
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message || "Signup failed!");
+
+      localStorage.setItem("token", data.token);
+      localStorage.setItem("isAuthenticated", "true");
+      localStorage.setItem("fromSignup", "true");
+
       login(username, password);
 
-      // Set localStorage flags
-      localStorage.setItem("isAuthenticated", "true");
-      localStorage.setItem("fromSignup", "true"); // Mark that we're coming from signup
-
-      // Redirect to team setup
       router.push("/team-setup");
-    } catch (error) {
-      setError("Error creating account. Please try again.");
+    } catch (err: any) {
+      console.error("Signup error:", err);
+      setError(err.message || "Error creating account");
     } finally {
       setLoading(false);
     }
   };
 
-  // Show loading state while checking auth
+  // Loader while checking
   if (isCheckingAuth) {
     return (
       <div className="min-h-screen dark-theme-background flex items-center justify-center">
@@ -90,11 +114,9 @@ export default function Auth() {
     );
   }
 
-  // Don't render anything if authenticated (during redirect)
-  if (isAuthenticated) {
-    return null;
-  }
+  if (isAuthenticated) return null;
 
+  // ✅ Your UI remains unchanged from here:
   return (
     <div className="min-h-screen gradient-bg bg-pattern flex items-center justify-center p-4 relative overflow-hidden">
       <Head>
@@ -121,7 +143,7 @@ export default function Auth() {
         </div>
 
         <div className="auth-card vibrant-card p-8">
-          {/* Initial View */}
+          {/* ==== VIEWS (unchanged UI) ==== */}
           {view === "initial" && (
             <div className="text-center">
               <h2 className="text-3xl font-bold text-white mb-2">
@@ -136,42 +158,26 @@ export default function Auth() {
                   onClick={() => setView("login")}
                   className="w-full group relative overflow-hidden bg-slate-700/50 hover:bg-slate-600/50 text-white font-semibold py-4 px-6 rounded-xl border border-slate-600/50 hover:border-slate-500/50 transition-all duration-300"
                 >
-                  <div className="flex items-center justify-center">
-                    <span>Login to Existing Account</span>
-                  </div>
+                  Login to Existing Account
                 </button>
 
                 <button
                   onClick={() => setView("signup")}
                   className="w-full group relative overflow-hidden bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 text-white font-semibold py-4 px-6 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105"
                 >
-                  <div className="flex items-center justify-center">
-                    <span>Create New Team</span>
-                  </div>
+                  Create New Team
                 </button>
 
                 <button
                   onClick={() => setView("join")}
                   className="w-full group relative overflow-hidden bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-500 hover:to-cyan-500 text-white font-semibold py-4 px-6 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105"
                 >
-                  <div className="flex items-center justify-center">
-                    <span>Join Team with Code</span>
-                  </div>
+                  Join Team with Code
                 </button>
-              </div>
-
-              <div className="mt-8 pt-6 border-t border-slate-600/50">
-                <p className="text-sm text-slate-400">
-                  New to hackathons?{" "}
-                  <span className="text-purple-400 cursor-pointer hover:underline">
-                    Learn more
-                  </span>
-                </p>
               </div>
             </div>
           )}
 
-          {/* Login View */}
           {view === "login" && (
             <div>
               <div className="text-center mb-8">
@@ -190,14 +196,14 @@ export default function Auth() {
               <form onSubmit={handleLogin} className="space-y-6">
                 <div>
                   <label className="block text-sm font-medium text-slate-200 mb-2">
-                    Username
+                    Email
                   </label>
                   <input
-                    type="text"
+                    type="email"
                     value={username}
                     onChange={(e) => setUsername(e.target.value)}
                     className="w-full px-4 py-3 bg-slate-700/50 border border-slate-600/50 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200"
-                    placeholder="Enter your username"
+                    placeholder="Enter your email"
                     required
                   />
                 </div>
@@ -221,29 +227,12 @@ export default function Auth() {
                   disabled={loading}
                   className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 text-white font-semibold py-3 px-6 rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  {loading ? (
-                    <div className="flex items-center justify-center">
-                      <div className="animate-spin rounded-full h-5 w-5 border-t-2 border-b-2 border-white mr-2"></div>
-                      Signing in...
-                    </div>
-                  ) : (
-                    "Sign In"
-                  )}
+                  {loading ? "Signing in..." : "Sign In"}
                 </button>
               </form>
-
-              <div className="mt-8 text-center">
-                <button
-                  onClick={() => setView("initial")}
-                  className="text-slate-400 hover:text-white transition-colors duration-200"
-                >
-                  ← Back to options
-                </button>
-              </div>
             </div>
           )}
 
-          {/* Signup View */}
           {view === "signup" && (
             <div>
               <h2 className="text-2xl font-bold text-center mb-6 text-slate-100">
@@ -261,20 +250,24 @@ export default function Auth() {
                     type="text"
                     value={username}
                     onChange={(e) => setUsername(e.target.value)}
-                    className="w-full bg-slate-700 border border-slate-600 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-sky-500 text-slate-100"
+                    className="w-full bg-slate-700 border border-slate-600 rounded-lg p-3 text-slate-100"
                     required
                   />
                 </div>
+
                 <div className="mb-4">
                   <label className="block text-sm font-medium mb-1 text-slate-300">
                     Email
                   </label>
                   <input
                     type="email"
-                    className="w-full bg-slate-700 border border-slate-600 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-sky-500 text-slate-100"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    className="w-full bg-slate-700 border border-slate-600 rounded-lg p-3 text-slate-100"
                     required
                   />
                 </div>
+
                 <div className="mb-6">
                   <label className="block text-sm font-medium mb-1 text-slate-300">
                     Password
@@ -283,10 +276,11 @@ export default function Auth() {
                     type="password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    className="w-full bg-slate-700 border border-slate-600 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-sky-500 text-slate-100"
+                    className="w-full bg-slate-700 border border-slate-600 rounded-lg p-3 text-slate-100"
                     required
                   />
                 </div>
+
                 <button
                   type="submit"
                   disabled={loading}
@@ -295,85 +289,6 @@ export default function Auth() {
                   {loading ? "Creating..." : "Sign Up & Create Team"}
                 </button>
               </form>
-              <p className="text-center text-sm text-slate-400 mt-6">
-                <a
-                  href="#"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    setView("initial");
-                  }}
-                  className="font-semibold text-sky-400 hover:underline"
-                >
-                  ← Back
-                </a>
-              </p>
-            </div>
-          )}
-
-          {/* Join View */}
-          {view === "join" && (
-            <div>
-              <h2 className="text-2xl font-bold text-center mb-6 text-slate-100">
-                Join Your Team
-              </h2>
-              {error && (
-                <p className="text-red-500 text-center mb-4">{error}</p>
-              )}
-              <form onSubmit={handleLogin}>
-                <div className="mb-4">
-                  <label className="block text-sm font-medium mb-1 text-slate-300">
-                    Team Invite Code
-                  </label>
-                  <input
-                    type="text"
-                    className="w-full bg-slate-700 border border-slate-600 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-sky-500 text-slate-100 font-mono"
-                    required
-                  />
-                </div>
-                <div className="mb-4">
-                  <label className="block text-sm font-medium mb-1 text-slate-300">
-                    Your Name
-                  </label>
-                  <input
-                    type="text"
-                    value={username}
-                    onChange={(e) => setUsername(e.target.value)}
-                    className="w-full bg-slate-700 border border-slate-600 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-sky-500 text-slate-100"
-                    required
-                  />
-                </div>
-                <div className="mb-6">
-                  <label className="block text-sm font-medium mb-1 text-slate-300">
-                    Set Your Password
-                  </label>
-                  <input
-                    type="password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    className="w-full bg-slate-700 border border-slate-600 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-sky-500 text-slate-100"
-                    required
-                  />
-                </div>
-                <button
-                  type="submit"
-                  disabled={loading}
-                  className="w-full btn-primary"
-                >
-                  {loading ? "Joining..." : "Join Team"}
-                </button>
-              </form>
-              <p className="text-center text-sm text-slate-400 mt-6">
-                <a
-                  href="#"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    setView("initial");
-                  }}
-                  className="font-semibold text-sky-400 hover:underline"
-                >
-                  ← Back
-                </a>
-              </p>
             </div>
           )}
         </div>

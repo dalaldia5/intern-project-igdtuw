@@ -9,18 +9,21 @@ export default function MyApp({ Component, pageProps }: AppProps) {
   const router = useRouter();
   const [initialRedirectDone, setInitialRedirectDone] = useState(false);
 
-  // Only redirect to auth on initial load
   useEffect(() => {
+    // Run this only on the client side
+    if (typeof window === "undefined") return;
+
     if (!initialRedirectDone) {
-      // Check if user is authenticated
       const isAuthenticated =
+        typeof window !== "undefined" &&
         localStorage.getItem("isAuthenticated") === "true";
 
-      // If not authenticated and not on auth page, redirect to auth
+      // Redirect only if user not logged in and not already on /auth
       if (!isAuthenticated && router.pathname !== "/auth") {
         router.replace("/auth");
       }
 
+      // Mark that initial redirect has been handled
       setInitialRedirectDone(true);
     }
   }, [router, initialRedirectDone]);

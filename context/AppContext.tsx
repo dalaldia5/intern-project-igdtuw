@@ -93,9 +93,9 @@ type AppProviderProps = {
 };
 
 // Force clear localStorage on initial load
-if (typeof window !== "undefined") {
-  localStorage.removeItem("isAuthenticated");
-}
+// if (typeof window !== "undefined") {
+//   localStorage.removeItem("isAuthenticated");
+// }
 
 export const AppProvider = ({ children }: AppProviderProps) => {
   // Always start with not authenticated

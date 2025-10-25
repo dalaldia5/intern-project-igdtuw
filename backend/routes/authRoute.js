@@ -1,30 +1,39 @@
-
-
-const express = require('express');
+const express = require("express");
 const router = express.Router();
 
-// ===== YEH NAYA MIDDLEWARE CODE ADD KAREIN =====
+// 🧭 Middleware for debugging each request
 router.use((req, res, next) => {
-    console.log('>>>>>>>>>> REQUEST RECEIVED BY authRoute.js! <<<<<<<<<<');
-    next(); // Taaki request aage /signup route tak jaaye
+  console.log(`➡️ [authRoute.js] ${req.method} ${req.originalUrl} request received`);
+  next(); // Aage controller tak jaane do
 });
 
-// Import both functions now
-const { registerUser, loginUser, getUserProfile } = require('../controllers/authController.js');
-// Middleware import karein
-const { protect } = require('../middleware/authMiddleware.js');
+// 🧩 Import controllers
+const {
+  registerUser,
+  loginUser,
+  getUserProfile,
+} = require("../controllers/authController.js");
 
+// 🛡️ Import auth middleware
+const { protect } = require("../middleware/authMiddleware.js");
 
-// ===== NAYA DEBUGGING CODE START =====
+// 🧠 Quick Debug Info
 console.log("--- DEBUGGING authRoute.js ---");
-console.log("Type of registerUser is:", typeof registerUser);
+console.log("registerUser typeof:", typeof registerUser);
+console.log("loginUser typeof:", typeof loginUser);
+console.log("getUserProfile typeof:", typeof getUserProfile);
 console.log("----------------------------");
-// ===== NAYA DEBUGGING CODE END =====
 
-router.post('/signup', registerUser);
-router.post('/login', loginUser); // <-- Add this new line for login
+// 📝 Routes
 
-// Yeh naya protected route add karein
-router.get('/me', protect, getUserProfile); // 'protect' middleware pehle chalega, phir 'getUserProfile' controller
+// ➕ Signup route
+router.post("/signup", registerUser);
 
+// 🔐 Login route
+router.post("/login", loginUser);
+
+// 👤 Get user profile (Protected)
+router.get("/me", protect, getUserProfile);
+
+// ✅ Export router
 module.exports = router;

@@ -1,30 +1,37 @@
-const jwt = require('jsonwebtoken');
-const User = require('../models/User.js');
+const jwt = require("jsonwebtoken");
+const User = require("../models/User.js");
 
 const protect = async (req, res, next) => {
-    let token;
+  let token;
 
-    if (req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
-        try {
-            // Get token from header (it's in the format "Bearer <token>")
-            token = req.headers.authorization.split(' ')[1];
+  // 🧭 Check for Authorization header and Bearer token
+  if (req.headers.authorization?.startsWith("Bearer")) {
+    try {
+      // 🪙 Extract token after "Bearer "
+      token = req.headers.authorization.split(" ")[1];
 
-            // Verify the token
-            const decoded = jwt.verify(token, process.env.JWT_SECRET);
+      // 🔍 Verify token
+      const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
-            // Get user from the token's ID and attach it to the request object
-            req.user = await User.findById(decoded.id).select('-password');
+      // 👤 Attach user to request (without password)
+      req.user = await User.findById(decoded.id).select("-password");
 
-            next(); // Move on to the next function (the controller)
-        } catch (error) {
-            console.error(error);
-            res.status(401).json({ message: 'Not authorized, token failed' });
-        }
+      if (!req.user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+
+      // ✅ Continue to next middleware/controller
+      return next();
+    } catch (error) {
+      console.error("❌ Token verification failed:", error.message);
+      return res.status(401).json({ message: "Not authorized, token invalid" });
     }
+  }
 
-    if (!token) {
-        res.status(401).json({ message: 'Not authorized, no token' });
-    }
+  // 🚫 No token found at all
+  if (!token) {
+    return res.status(401).json({ message: "Not authorized, no token provided" });
+  }
 };
 
 module.exports = { protect };

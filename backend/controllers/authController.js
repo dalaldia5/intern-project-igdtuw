@@ -19,16 +19,13 @@ const registerUser = async (req, res) => {
       return res.status(400).json({ message: "User already exists" });
     }
 
-    // 2️⃣ Hash password before saving
-    const salt = await bcrypt.genSalt(10);
-    const hashedPassword = await bcrypt.hash(password, salt);
+    // 2️⃣ Create user in database (schema will auto-hash password)
+const user = await User.create({
+  name,
+  email,
+  password,
+});
 
-    // 3️⃣ Create user in database
-    const user = await User.create({
-      name,
-      email,
-      password: hashedPassword,
-    });
 
     // 4️⃣ Return JWT token with response
     if (user) {

@@ -15,6 +15,9 @@ export default function Auth() {
   const [error, setError] = useState("");
   const [isCheckingAuth, setIsCheckingAuth] = useState(true);
 
+  // ✅ Use environment variable for backend URL
+  const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
+
   // ✅ On mount, check auth state
   useEffect(() => {
     const timer = setTimeout(() => setIsCheckingAuth(false), 200);
@@ -41,28 +44,30 @@ export default function Auth() {
     setLoading(true);
 
     try {
-      const res = await fetch("http://localhost:5000/api/auth/login", {
+      const res = await fetch(`${API_URL}/auth/login`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ email: username, password }),
+        body: JSON.stringify({ email, password }),
       });
 
-      const data = await res.json();
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data.message || "Login failed!");
+      }
 
-      if (!res.ok) throw new Error(data.message || "Login failed!");
+      const data = await res.json();
 
       // Save token + auth state
       localStorage.setItem("token", data.token);
       localStorage.setItem("isAuthenticated", "true");
 
       login(username, password);
-
       router.push("/dashboard");
     } catch (err: any) {
       console.error("Login error:", err);
-      setError(err.message || "Invalid credentials");
+      setError(err.message || "Unable to connect to server. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -75,7 +80,7 @@ export default function Auth() {
     setLoading(true);
 
     try {
-      const res = await fetch("http://localhost:5000/api/auth/signup", {
+      const res = await fetch(`${API_URL}/auth/signup`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -87,19 +92,22 @@ export default function Auth() {
         }),
       });
 
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data.message || "Signup failed!");
+      }
+
       const data = await res.json();
-      if (!res.ok) throw new Error(data.message || "Signup failed!");
 
       localStorage.setItem("token", data.token);
       localStorage.setItem("isAuthenticated", "true");
       localStorage.setItem("fromSignup", "true");
 
       login(username, password);
-
       router.push("/team-setup");
     } catch (err: any) {
       console.error("Signup error:", err);
-      setError(err.message || "Error creating account");
+      setError(err.message || "Unable to connect to server. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -116,14 +124,13 @@ export default function Auth() {
 
   if (isAuthenticated) return null;
 
-  // ✅ Your UI remains unchanged from here:
+  // ✅ Your UI
   return (
     <div className="min-h-screen gradient-bg bg-pattern flex items-center justify-center p-4 relative overflow-hidden">
       <Head>
         <title>HackHub - Authentication</title>
       </Head>
 
-      {/* Background Elements */}
       <div className="absolute inset-0 overflow-hidden">
         <div className="background-orb absolute -top-40 -right-40 w-80 h-80 bg-purple-500/20 rounded-full blur-3xl"></div>
         <div className="background-orb absolute -bottom-40 -left-40 w-80 h-80 bg-pink-500/20 rounded-full blur-3xl"></div>
@@ -131,7 +138,6 @@ export default function Auth() {
       </div>
 
       <div className="auth-container w-full max-w-lg">
-        {/* Logo Section */}
         <div className="text-center mb-8">
           <div className="auth-logo w-20 h-20 bg-gradient-to-br from-purple-500 via-pink-500 to-orange-500 rounded-2xl mx-auto mb-4 flex items-center justify-center shadow-2xl">
             <span className="text-3xl">🚀</span>
@@ -143,12 +149,9 @@ export default function Auth() {
         </div>
 
         <div className="auth-card vibrant-card p-8">
-          {/* ==== VIEWS (unchanged UI) ==== */}
           {view === "initial" && (
             <div className="text-center">
-              <h2 className="text-3xl font-bold text-white mb-2">
-                Get Started
-              </h2>
+              <h2 className="text-3xl font-bold text-white mb-2">Get Started</h2>
               <p className="text-slate-300 mb-8">
                 Choose how you'd like to join the hackathon
               </p>
@@ -156,21 +159,21 @@ export default function Auth() {
               <div className="space-y-4">
                 <button
                   onClick={() => setView("login")}
-                  className="w-full group relative overflow-hidden bg-slate-700/50 hover:bg-slate-600/50 text-white font-semibold py-4 px-6 rounded-xl border border-slate-600/50 hover:border-slate-500/50 transition-all duration-300"
+                  className="w-full bg-slate-700/50 hover:bg-slate-600/50 text-white font-semibold py-4 px-6 rounded-xl border border-slate-600/50 hover:border-slate-500/50 transition-all duration-300"
                 >
                   Login to Existing Account
                 </button>
 
                 <button
                   onClick={() => setView("signup")}
-                  className="w-full group relative overflow-hidden bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 text-white font-semibold py-4 px-6 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105"
+                  className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 text-white font-semibold py-4 px-6 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105"
                 >
                   Create New Team
                 </button>
 
                 <button
                   onClick={() => setView("join")}
-                  className="w-full group relative overflow-hidden bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-500 hover:to-cyan-500 text-white font-semibold py-4 px-6 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105"
+                  className="w-full bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-500 hover:to-cyan-500 text-white font-semibold py-4 px-6 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105"
                 >
                   Join Team with Code
                 </button>
@@ -181,9 +184,7 @@ export default function Auth() {
           {view === "login" && (
             <div>
               <div className="text-center mb-8">
-                <h2 className="text-2xl font-bold text-white mb-2">
-                  Welcome Back
-                </h2>
+                <h2 className="text-2xl font-bold text-white mb-2">Welcome Back</h2>
                 <p className="text-slate-300">Sign in to your account</p>
               </div>
 
@@ -200,8 +201,8 @@ export default function Auth() {
                   </label>
                   <input
                     type="email"
-                    value={username}
-                    onChange={(e) => setUsername(e.target.value)}
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
                     className="w-full px-4 py-3 bg-slate-700/50 border border-slate-600/50 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200"
                     placeholder="Enter your email"
                     required
@@ -238,9 +239,7 @@ export default function Auth() {
               <h2 className="text-2xl font-bold text-center mb-6 text-slate-100">
                 Create Your Team
               </h2>
-              {error && (
-                <p className="text-red-500 text-center mb-4">{error}</p>
-              )}
+              {error && <p className="text-red-500 text-center mb-4">{error}</p>}
               <form onSubmit={handleSignup}>
                 <div className="mb-4">
                   <label className="block text-sm font-medium mb-1 text-slate-300">

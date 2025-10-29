@@ -1,3 +1,4 @@
+"use client";
 import { useState } from "react";
 import Layout from "../components/Layout";
 
@@ -14,56 +15,68 @@ export default function Pitch() {
   const [isGeneratingImprovements, setIsGeneratingImprovements] =
     useState(false);
 
+  // ✅ Generate Pitch using Gemini API
   const generatePitch = async () => {
     if (!pitchInput.trim()) {
-      setPitchOutput("Please enter some bullet points first.");
+      setPitchOutput("⚠ Please enter some bullet points first.");
       return;
     }
 
     setIsGenerating(true);
-    setPitchOutput("Generating your pitch...");
+    setPitchOutput("Generating your pitch using Gemini AI...");
 
-    // In a real app, this would call your backend API which would use the AI service
-    // For demo, we'll simulate a delay and then show a mock response
-    setTimeout(() => {
-      const mockPitch = `
-# HackHub: Revolutionizing Hackathon Collaboration
+    try {
+      const res = await fetch("http://localhost:5000/api/gemini", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ idea: pitchInput }),
+      });
 
-HackHub is an all-in-one collaboration platform designed specifically for hackathon teams. Our solution addresses the common challenges teams face during intense development sprints by providing:
+      const data = await res.json();
 
-- **Real-time task tracking** with an intuitive Kanban board that keeps everyone synchronized
-- **AI-powered pitch generation** that transforms bullet points into compelling presentations
-- **Centralized communication hub** with smart summarization to catch up on discussions quickly
-- **Integrated file repository** for seamless sharing of resources and documentation
+      if (data.pitch) {
+        setPitchOutput(data.pitch);
+        setShowAssistant(true);
+      } else {
+        setPitchOutput("❌ Failed to generate pitch. Try again.");
+      }
+    } catch (err) {
+      console.error(err);
+      setPitchOutput("⚠ Error generating pitch. Please try again later.");
+    }
 
-By streamlining team coordination and automating routine tasks, HackHub empowers developers to focus on what truly matters - building innovative solutions. Our platform increases team productivity by an estimated 30% while reducing the stress of hackathon deadlines.
-
-Join the future of hackathon collaboration with HackHub - where great ideas meet seamless execution.
-      `;
-
-      setPitchOutput(mockPitch);
-      setShowAssistant(true);
-      setIsGenerating(false);
-    }, 2000);
+    setIsGenerating(false);
   };
 
+  // ✅ Get Improvements using Gemini API
   const getPitchImprovements = async () => {
+    if (!pitchOutput || pitchOutput.startsWith("⚠")) return;
+
     setIsGeneratingImprovements(true);
-    setAssistantOutput("Analyzing for improvements...");
+    setAssistantOutput("Analyzing your pitch for improvements...");
 
-    // Again, in a real app this would be an API call
-    setTimeout(() => {
-      const mockImprovements = `
-1. **Add Quantifiable Metrics**: Include specific statistics about how much time HackHub saves or how many teams have successfully used it.
+    try {
+      const res = await fetch("http://localhost:5000/api/gemini", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          idea: `Suggest improvements for this startup pitch:\n\n${pitchOutput}`,
+        }),
+      });
 
-2. **Highlight Technical Differentiation**: Mention the specific technologies powering your platform (e.g., real-time database, NLP for summarization).
+      const data = await res.json();
 
-3. **Include a Clear Call-to-Action**: End with a specific next step for interested hackathon organizers or participants.
-      `;
+      if (data.pitch) {
+        setAssistantOutput(data.pitch);
+      } else {
+        setAssistantOutput("❌ Could not analyze pitch. Try again.");
+      }
+    } catch (err) {
+      console.error(err);
+      setAssistantOutput("⚠ Error analyzing improvements.");
+    }
 
-      setAssistantOutput(mockImprovements);
-      setIsGeneratingImprovements(false);
-    }, 2000);
+    setIsGeneratingImprovements(false);
   };
 
   return (
@@ -72,12 +85,13 @@ Join the future of hackathon collaboration with HackHub - where great ideas meet
         AI Pitch Generator
       </h2>
       <p className="text-body-sm font-body text-zinc-400 mb-6 max-w-3xl">
-        Struggling to articulate your project's vision? Simply enter your core
-        ideas as bullet points in the text area below. Our AI assistant will
-        analyze them and generate a concise, compelling summary perfect for your
-        final pitch.
+        Struggling to articulate your project's vision? Enter your core ideas
+        as bullet points below. Our AI assistant will generate a concise, 
+        compelling summary perfect for your final pitch.
       </p>
+
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Left Panel */}
         <div className="card">
           <h3 className="text-heading-lg font-heading mb-4">
             Your Bullet Points
@@ -86,7 +100,10 @@ Join the future of hackathon collaboration with HackHub - where great ideas meet
             value={pitchInput}
             onChange={(e) => setPitchInput(e.target.value)}
             className="input-enhanced w-full h-64 text-body-sm font-mono placeholder-enhanced"
-            placeholder="- AI-powered collaboration hub&#x0a;- Real-time task tracking&#x0a;- Automated pitch generation&#x0a;- Centralized file storage"
+            placeholder={`- AI-powered collaboration hub
+- Real-time task tracking
+- Automated pitch generation
+- Centralized file storage`}
           ></textarea>
           <button
             onClick={generatePitch}
@@ -100,6 +117,8 @@ Join the future of hackathon collaboration with HackHub - where great ideas meet
             {isGenerating ? "Generating..." : "Generate Pitch"}
           </button>
         </div>
+
+        {/* Right Panel */}
         <div className="card">
           <h3 className="text-heading-lg font-heading mb-4">
             Generated Pitch Summary
@@ -107,6 +126,7 @@ Join the future of hackathon collaboration with HackHub - where great ideas meet
           <div className="w-full h-64 glass rounded-xl border border-dashed border-zinc-600 p-4 text-body-sm font-body text-zinc-400 overflow-y-auto whitespace-pre-line">
             {pitchOutput}
           </div>
+
           {showAssistant && (
             <div className="mt-4">
               <h4 className="text-heading-md font-heading mb-2">

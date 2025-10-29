@@ -1,5 +1,6 @@
 import { useState } from "react";
 import Layout from "../components/Layout";
+import axios from "axios";
 
 interface ChatMessage {
   id: number;
@@ -37,11 +38,13 @@ export default function Chat() {
       isCurrentUser: true,
     },
   ]);
+
   const [newMessage, setNewMessage] = useState("");
   const [showSummaryModal, setShowSummaryModal] = useState(false);
   const [summaryText, setSummaryText] = useState("");
   const [isGeneratingSummary, setIsGeneratingSummary] = useState(false);
 
+  // ------------------- Send New Message -------------------
   const handleSendMessage = (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -62,42 +65,32 @@ export default function Chat() {
       isCurrentUser: true,
     };
 
-    setMessages([...messages, newChatMessage]);
+    setMessages((prev) => [...prev, newChatMessage]);
     setNewMessage("");
   };
 
+  // ------------------- Summarize Chat via Flask API -------------------
   const summarizeChat = async () => {
     setShowSummaryModal(true);
     setIsGeneratingSummary(true);
 
-    // In a real app, this would be an API call to your backend
-    // For demo purposes, we'll simulate a delay and then show a mock summary
-    setTimeout(() => {
-      setSummaryText(`
-        <h3 class="font-semibold mb-2">Key Discussion Points:</h3>
-        <ul class="list-disc pl-5 mb-4">
-          <li>Backend structure completion by Aastha</li>
-          <li>Pitch generator API integration planned by Aarti and Anushka</li>
-          <li>Dashboard UI progress with working chart by Dia</li>
-        </ul>
-        
-        <h3 class="font-semibold mb-2">Action Items:</h3>
-        <ul class="list-disc pl-5 mb-4">
-          <li>Review backend models (Assigned: Team)</li>
-          <li>Continue dashboard development (Assigned: Dia)</li>
-          <li>Begin API integration (Assigned: Aarti & Anushka)</li>
-        </ul>
-        
-        <h3 class="font-semibold mb-2">Decisions Made:</h3>
-        <ul class="list-disc pl-5">
-          <li>Proceed with pitch generator integration as backend is ready</li>
-          <li>Focus on completing core dashboard functionality before adding new features</li>
-        </ul>
-      `);
+    try {
+      const chatPayload = {
+        chat: messages.map((m) => ({ message: m.text })),
+      };
+
+      const response = await axios.post("http://127.0.0.1:5000/summarize", chatPayload);
+
+      setSummaryText(response.data.summary);
+    } catch (error) {
+      console.error("Error summarizing chat:", error);
+      setSummaryText("❌ Failed to generate summary. Please try again.");
+    } finally {
       setIsGeneratingSummary(false);
-    }, 2000);
+    }
   };
 
+  // ------------------- UI -------------------
   return (
     <Layout>
       <h2 className="text-display-md font-display text-gradient-primary mb-2 text-glow">
@@ -109,6 +102,7 @@ export default function Chat() {
         'Summarize Chat with AI' button to get a condensed overview of recent
         discussions.
       </p>
+
       <div className="card h-[70vh] flex flex-col">
         <div className="flex justify-between items-center border-b border-zinc-700 pb-3 mb-4">
           <h3 className="text-heading-lg font-heading">#general</h3>
@@ -116,12 +110,10 @@ export default function Chat() {
             Summarize Chat
           </button>
         </div>
+
         <div className="flex-1 overflow-y-auto space-y-4 pr-2">
           {messages.map((message) => (
-            <div
-              key={message.id}
-              className="flex items-start gap-3 chat-message"
-            >
+            <div key={message.id} className="flex items-start gap-3 chat-message">
               <img
                 src={message.avatar}
                 className="w-10 h-10 rounded-full"
@@ -147,10 +139,8 @@ export default function Chat() {
             </div>
           ))}
         </div>
-        <form
-          onSubmit={handleSendMessage}
-          className="mt-4 pt-4 border-t border-zinc-700"
-        >
+
+        <form onSubmit={handleSendMessage} className="mt-4 pt-4 border-t border-zinc-700">
           <input
             type="text"
             placeholder="Type your message..."
@@ -161,21 +151,20 @@ export default function Chat() {
         </form>
       </div>
 
-      {/* AI Summary Modal */}
+      {/* ------------------- AI Summary Modal ------------------- */}
       {showSummaryModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 modal-backdrop">
           <div className="card w-full max-w-2xl">
-            <h2 className="text-heading-xl font-heading mb-4">
-              ✨ AI Chat Summary
-            </h2>
-            <div
-              className="text-body-md font-body text-zinc-300 max-h-[60vh] overflow-y-auto pr-2"
-              dangerouslySetInnerHTML={{
-                __html: isGeneratingSummary
-                  ? "<p>Generating summary...</p>"
-                  : summaryText,
-              }}
-            />
+            <h2 className="text-heading-xl font-heading mb-4">✨ AI Chat Summary</h2>
+
+            <div className="text-body-md font-body text-zinc-300 max-h-[60vh] overflow-y-auto pr-2">
+              {isGeneratingSummary ? (
+                <p>Generating summary...</p>
+              ) : (
+                <p className="whitespace-pre-line">{summaryText}</p>
+              )}
+            </div>
+
             <button
               onClick={() => setShowSummaryModal(false)}
               className="w-full mt-6 btn-primary"

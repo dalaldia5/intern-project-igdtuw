@@ -1,8 +1,8 @@
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import Layout from "../components/Layout";
 
 interface FileItem {
-  id: number;
+  id: string;
   name: string;
   type: "document" | "image" | "presentation";
   icon: string;
@@ -16,12 +16,7 @@ interface LinkItem {
 }
 
 export default function Files() {
-  const [files, setFiles] = useState<FileItem[]>([
-    { id: 1, name: "Project_Brief.pdf", type: "document", icon: "📄" },
-    { id: 2, name: "Whiteboard_Flow.png", type: "image", icon: "🖼️" },
-    { id: 3, name: "Final_Pitch.pptx", type: "presentation", icon: "📊" },
-  ]);
-
+  const [files, setFiles] = useState<FileItem[]>([]);
   const [links, setLinks] = useState<LinkItem[]>([
     {
       id: 1,
@@ -41,11 +36,102 @@ export default function Files() {
   const [newLinkTitle, setNewLinkTitle] = useState("");
   const [newLinkUrl, setNewLinkUrl] = useState("");
   const [newLinkCategory, setNewLinkCategory] = useState("");
+  const [uploadedFile, setUploadedFile] = useState<string | null>(null);
 
-  const handleFileUpload = () => {
-    // In a real app, this would trigger a file input and upload process
-    alert("File upload functionality would be implemented here.");
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
+
+  // ✅ Fetch all files from backend
+  useEffect(() => {
+    const fetchFiles = async () => {
+      try {
+        const res = await fetch("http://localhost:5000/api/files/files");
+        const data = await res.json();
+        if (res.ok) {
+          setFiles(
+            data.map((file: any) => ({
+              id: file._id,
+              name: file.filename,
+              type: "document",
+              icon: "📄",
+            }))
+          );
+        }
+      } catch (err) {
+        console.error("Error fetching files:", err);
+      }
+    };
+    fetchFiles();
+  }, []);
+
+  const triggerFileSelect = () => {
+    fileInputRef.current?.click();
   };
+
+  // ✅ Upload file
+  const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    const formData = new FormData();
+    formData.append("file", file);
+
+    try {
+      const res = await fetch("http://localhost:5000/api/files/upload", {
+        method: "POST",
+        body: formData,
+      });
+
+      const data = await res.json();
+
+      if (res.ok) {
+        alert("✅ File uploaded successfully!");
+        setUploadedFile(data.file.filename);
+        setFiles((prev) => [
+          ...prev,
+          {
+            id: Date.now().toString(),
+            name: data.file.filename,
+            type: "document",
+            icon: "📄",
+          },
+        ]);
+      } else {
+        alert(`❌ Upload failed: ${data.message}`);
+      }
+    } catch (err) {
+      console.error(err);
+      alert("Error uploading file!");
+    }
+  };
+
+  const handleDeleteFile = async (filename: string) => {
+  if (!window.confirm(`Are you sure you want to delete "${filename}"?`)) return;
+
+  try {
+    const res = await fetch(`http://localhost:5000/api/files/file/${filename}`, {
+      method: "DELETE",
+    });
+
+    let data;
+    try {
+      data = await res.json();
+    } catch {
+      data = { message: "Unexpected response (HTML returned instead of JSON)" };
+    }
+
+    if (res.ok) {
+      alert("✅ File deleted successfully!");
+      setFiles((prev) => prev.filter((f) => f.name !== filename));
+    } else {
+      alert(`❌ Failed to delete: ${data.message}`);
+    }
+  } catch (err) {
+    console.error("Error deleting file:", err);
+    alert("Error deleting file!");
+  }
+};
+
+
 
   const openAddLinkModal = () => {
     setNewLinkTitle("");
@@ -77,42 +163,82 @@ export default function Files() {
       <h2 className="text-display-md font-display text-gradient-primary mb-6 text-glow">
         Files & Links
       </h2>
+
       <p className="text-body-sm font-body text-zinc-400 mb-6 max-w-3xl">
         This section is your team's shared repository. Upload important
-        documents, presentations, and whiteboard snapshots. You can also save
-        and share crucial web links, ensuring everyone has access to the same
-        resources.
+        documents, presentations, and snapshots. You can also save and share
+        web links, ensuring everyone has access to the same resources.
       </p>
+
+      {/* ✅ File Upload Section */}
       <div className="card mb-6">
         <div className="flex justify-between items-center mb-4">
           <h3 className="text-heading-lg font-heading">Uploaded Files</h3>
-          <button onClick={handleFileUpload} className="btn-primary text-sm">
+          <button onClick={triggerFileSelect} className="btn-primary text-sm">
             Upload File
           </button>
+
+          <input
+            type="file"
+            ref={fileInputRef}
+            onChange={handleFileUpload}
+            className="hidden"
+          />
         </div>
+
+        {/* ✅ File grid with delete button */}
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
           {files.map((file) => (
             <div
               key={file.id}
-              className="glass rounded-xl p-3 text-center transition-all duration-300 hover:scale-105"
+              className="glass rounded-xl p-3 text-center transition-all duration-300 hover:scale-105 relative"
             >
-              <span className="text-4xl">{file.icon}</span>
-              <p className="text-body-sm font-body mt-2 truncate">
-                {file.name}
-              </p>
+              <button
+                onClick={() => handleDeleteFile(file.name)}
+                className="absolute top-2 right-2 text-red-400 hover:text-red-600 text-sm"
+                title="Delete file"
+              >
+                ✖
+              </button>
+
+              <a
+                href={`http://localhost:5000/api/files/file/${file.name}`}
+                download
+                className="block"
+              >
+                <span className="text-4xl">{file.icon}</span>
+                <p className="text-body-sm font-body mt-2 truncate text-blue-400 hover:underline">
+                  {file.name}
+                </p>
+              </a>
             </div>
           ))}
         </div>
+
+        {/* ✅ Show recently uploaded file */}
+        {uploadedFile && (
+          <div className="mt-4 text-center">
+            <p className="text-sm text-zinc-400 mb-2">Latest uploaded file:</p>
+            <a
+              href={`http://localhost:5000/api/files/file/${uploadedFile}`}
+              download
+              className="text-blue-400 underline"
+            >
+              Download {uploadedFile}
+            </a>
+          </div>
+        )}
       </div>
+
+      {/* ✅ Links Section */}
       <div className="card">
         <div className="flex justify-between items-center mb-4">
-          <h3 className="text-heading-lg font-heading">
-            Saved Important Links
-          </h3>
+          <h3 className="text-heading-lg font-heading">Saved Important Links</h3>
           <button onClick={openAddLinkModal} className="btn-primary text-sm">
             Add Link
           </button>
         </div>
+
         <ul className="space-y-2">
           {links.map((link) => (
             <li
@@ -127,15 +253,13 @@ export default function Files() {
               >
                 {link.title}
               </a>
-              <span className="text-caption text-zinc-500">
-                {link.category}
-              </span>
+              <span className="text-caption text-zinc-500">{link.category}</span>
             </li>
           ))}
         </ul>
       </div>
 
-      {/* Add Link Modal */}
+      {/* ✅ Add Link Modal */}
       {showAddLinkModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 modal-backdrop">
           <div className="card w-full max-w-md">

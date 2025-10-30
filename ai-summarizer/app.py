@@ -6,7 +6,7 @@ import torch
 app = Flask(__name__)
 CORS(app)  # Enable frontend requests
 
-# Load summarization model
+# ---------------- Summarizer ----------------
 summarizer = pipeline(
     "summarization",
     model="facebook/bart-large-cnn",
@@ -39,6 +39,21 @@ def summarize_chat():
 
     except Exception as e:
         return jsonify({'error': f'Server Error: {str(e)}'}), 500
+
+# ---------------- Chat Persistence ----------------
+chat_history = []
+
+@app.route('/chat', methods=['GET'])
+def get_chat():
+    return jsonify(chat_history)
+
+@app.route('/chat', methods=['POST'])
+def add_chat():
+    data = request.get_json()
+    author = data.get("author", "Unknown")
+    message = data.get("message", "")
+    chat_history.append({"author": author, "message": message})
+    return jsonify({"status": "ok"})
 
 if __name__ == '__main__':
     app.run(debug=True)

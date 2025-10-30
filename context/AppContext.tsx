@@ -6,7 +6,7 @@ import {
   useEffect,
 } from "react";
 
-// Define types for task and team member
+// ------------------- Types -------------------
 interface Task {
   id: string;
   title: string;
@@ -24,13 +24,11 @@ interface TeamMember {
 }
 
 type AppContextType = {
-  // User authentication
   isAuthenticated: boolean;
   setIsAuthenticated: (value: boolean) => void;
   login: (username: string, password: string) => void;
   logout: () => void;
 
-  // Team information
   teamName: string;
   setTeamName: (name: string) => void;
   teamBio: string;
@@ -39,21 +37,17 @@ type AppContextType = {
   setTeamMembers: (members: TeamMember[]) => void;
   addTeamMember: (member: Omit<TeamMember, "id">) => void;
 
-  // User information
   currentUser: TeamMember | null;
   setCurrentUser: (user: TeamMember | null) => void;
 
-  // Tasks
   tasks: Task[];
   setTasks: (tasks: Task[]) => void;
   addTask: (task: Task) => void;
   updateTask: (id: string, updates: Partial<Task>) => void;
 
-  // Project deadline
   deadline: Date | null;
   setDeadline: (date: Date | null) => void;
 
-  // Hackathon timer
   hackathonEndTime: Date | null;
   setHackathonEndTime: (date: Date | null) => void;
   resetHackathonTimer: () => void;
@@ -85,20 +79,14 @@ const defaultContextValue: AppContextType = {
 };
 
 export const AppContext = createContext<AppContextType>(defaultContextValue);
-
 export const useAppContext = () => useContext(AppContext);
 
 type AppProviderProps = {
   children: ReactNode;
 };
 
-// Force clear localStorage on initial load
-// if (typeof window !== "undefined") {
-//   localStorage.removeItem("isAuthenticated");
-// }
-
+// ------------------- Provider -------------------
 export const AppProvider = ({ children }: AppProviderProps) => {
-  // Always start with not authenticated
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isInitialized, setIsInitialized] = useState(false);
 
@@ -108,6 +96,7 @@ export const AppProvider = ({ children }: AppProviderProps) => {
   );
   const [teamMembers, setTeamMembers] = useState<TeamMember[]>([]);
   const [currentUser, setCurrentUser] = useState<TeamMember | null>(null);
+
   const [tasks, setTasks] = useState<Task[]>([
     {
       id: "1",
@@ -138,24 +127,32 @@ export const AppProvider = ({ children }: AppProviderProps) => {
       assignee: "You",
     },
   ]);
+
   const [deadline, setDeadline] = useState<Date | null>(
-    new Date(Date.now() + 7 * 24 * 60 * 60 * 1000) // 7 days from now
+    new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
   );
+
   const [hackathonEndTime, setHackathonEndTime] = useState<Date | null>(null);
 
-  // Initialize auth state from localStorage only on client-side
+  // ------------------- Initialize Auth from localStorage -------------------
   useEffect(() => {
-    // Force clear localStorage on component mount
     if (typeof window !== "undefined") {
-      localStorage.removeItem("isAuthenticated");
-    }
+      const savedAuth = localStorage.getItem("isAuthenticated");
+      const savedUser = localStorage.getItem("currentUser");
 
-    // Always start as not authenticated
-    setIsAuthenticated(false);
-    setIsInitialized(true);
+      if (savedAuth === "true") {
+        setIsAuthenticated(true);
+      }
+
+      if (savedUser) {
+        setCurrentUser(JSON.parse(savedUser));
+      }
+
+      setIsInitialized(true);
+    }
   }, []);
 
-  // Update localStorage when authentication state changes
+  // ------------------- Sync Auth State -------------------
   useEffect(() => {
     if (isInitialized && typeof window !== "undefined") {
       if (isAuthenticated) {
@@ -166,21 +163,19 @@ export const AppProvider = ({ children }: AppProviderProps) => {
     }
   }, [isAuthenticated, isInitialized]);
 
-  // Initialize hackathon timer from localStorage or set default
+  // ------------------- Hackathon Timer Persistence -------------------
   useEffect(() => {
     if (typeof window !== "undefined") {
       const storedEndTime = localStorage.getItem("hackathonEndTime");
       const storedDeadline = localStorage.getItem("projectDeadline");
 
       if (storedDeadline) {
-        // If we have a stored deadline, use it for both deadline and hackathon timer
         const deadlineDate = new Date(storedDeadline);
         setDeadline(deadlineDate);
         setHackathonEndTime(deadlineDate);
       } else if (storedEndTime) {
         setHackathonEndTime(new Date(storedEndTime));
       } else {
-        // Set default hackathon duration (48 hours from now)
         const defaultEndTime = new Date(Date.now() + 48 * 60 * 60 * 1000);
         setHackathonEndTime(defaultEndTime);
         localStorage.setItem("hackathonEndTime", defaultEndTime.toISOString());
@@ -188,66 +183,64 @@ export const AppProvider = ({ children }: AppProviderProps) => {
     }
   }, []);
 
-  // Update localStorage when hackathon end time changes
   useEffect(() => {
     if (hackathonEndTime && typeof window !== "undefined") {
       localStorage.setItem("hackathonEndTime", hackathonEndTime.toISOString());
     }
   }, [hackathonEndTime]);
 
+  // ------------------- Auth Functions -------------------
   const login = (username: string, password: string) => {
-    // In a real app, you would validate credentials against an API
-    console.log(`Logging in with username: ${username}`);
+    console.log(`Logging in as ${username}`);
 
-    // Create a user based on the login info
-    const avatar = `https://placehold.co/200x200/1e293b/38bdf8?text=${username
-      .charAt(0)
-      .toUpperCase()}`;
-
-    setCurrentUser({
+    const user = {
       id: `user-${Date.now()}`,
       name: username,
       role: "Team Member",
-      avatar,
-    });
+      avatar: `https://placehold.co/200x200/1e293b/38bdf8?text=${username
+        .charAt(0)
+        .toUpperCase()}`,
+    };
 
+    setCurrentUser(user);
     setIsAuthenticated(true);
+
     if (typeof window !== "undefined") {
       localStorage.setItem("isAuthenticated", "true");
+      localStorage.setItem("currentUser", JSON.stringify(user));
     }
   };
 
   const logout = () => {
     setIsAuthenticated(false);
     setCurrentUser(null);
+
     if (typeof window !== "undefined") {
       localStorage.removeItem("isAuthenticated");
+      localStorage.removeItem("currentUser");
     }
   };
 
+  // ------------------- Tasks & Team -------------------
   const addTask = (task: Task) => {
-    setTasks((prevTasks) => [...prevTasks, task]);
+    setTasks((prev) => [...prev, task]);
   };
 
   const updateTask = (id: string, updates: Partial<Task>) => {
-    setTasks((prevTasks) =>
-      prevTasks.map((task) => (task.id === id ? { ...task, ...updates } : task))
+    setTasks((prev) =>
+      prev.map((t) => (t.id === id ? { ...t, ...updates } : t))
     );
   };
 
   const addTeamMember = (member: Omit<TeamMember, "id">) => {
-    const newMember = {
-      ...member,
-      id: `member-${Date.now()}`,
-    };
-    setTeamMembers((prevMembers) => [...prevMembers, newMember]);
+    const newMember = { ...member, id: `member-${Date.now()}` };
+    setTeamMembers((prev) => [...prev, newMember]);
   };
 
-  // Custom setDeadline function that syncs with hackathon timer
+  // ------------------- Deadlines -------------------
   const updateDeadline = (date: Date | null) => {
     setDeadline(date);
     if (date) {
-      // Sync hackathon timer with deadline
       setHackathonEndTime(date);
       if (typeof window !== "undefined") {
         localStorage.setItem("projectDeadline", date.toISOString());
@@ -257,15 +250,16 @@ export const AppProvider = ({ children }: AppProviderProps) => {
   };
 
   const resetHackathonTimer = () => {
-    const newEndTime = new Date(Date.now() + 48 * 60 * 60 * 1000); // 48 hours from now
+    const newEndTime = new Date(Date.now() + 48 * 60 * 60 * 1000);
     setHackathonEndTime(newEndTime);
-    setDeadline(newEndTime); // Also update deadline
+    setDeadline(newEndTime);
     if (typeof window !== "undefined") {
       localStorage.setItem("hackathonEndTime", newEndTime.toISOString());
       localStorage.setItem("projectDeadline", newEndTime.toISOString());
     }
   };
 
+  // ------------------- Context Value -------------------
   const value = {
     isAuthenticated,
     setIsAuthenticated,

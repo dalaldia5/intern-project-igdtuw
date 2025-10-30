@@ -1,5 +1,6 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Layout from "../components/Layout";
+import { useAppContext } from "../context/AppContext";
 import axios from "axios";
 
 interface ChatMessage {
@@ -12,40 +13,44 @@ interface ChatMessage {
 }
 
 export default function Chat() {
-  const [messages, setMessages] = useState<ChatMessage[]>([
-    {
-      id: 1,
-      author: "Aastha",
-      avatar: "https://placehold.co/40x40/ca8a04/ffffff?text=A",
-      time: "3:40 PM",
-      text: "Backend structure is mostly done. I'm pushing the initial models now.",
-      isCurrentUser: false,
-    },
-    {
-      id: 2,
-      author: "Aarti",
-      avatar: "https://placehold.co/40x40/be185d/ffffff?text=A",
-      time: "3:42 PM",
-      text: "Great! Anushka and I will start integrating the pitch generator API then.",
-      isCurrentUser: false,
-    },
-    {
-      id: 3,
-      author: "Dia",
-      avatar: "https://placehold.co/40x40/38bdf8/ffffff?text=D",
-      time: "3:45 PM",
-      text: "Dashboard UI is coming along nicely! The progress chart is now live.",
-      isCurrentUser: true,
-    },
-  ]);
+  const { currentUser, teamMembers } = useAppContext();
 
+  const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [newMessage, setNewMessage] = useState("");
   const [showSummaryModal, setShowSummaryModal] = useState(false);
   const [summaryText, setSummaryText] = useState("");
   const [isGeneratingSummary, setIsGeneratingSummary] = useState(false);
 
+  // ------------------- Fetch Messages from Backend -------------------
+  useEffect(() => {
+    const fetchMessages = async () => {
+      try {
+        const res = await axios.get("http://127.0.0.1:5000/chat");
+        const fetched = res.data.map((m: any, i: number) => ({
+          id: i,
+          author: m.author,
+          avatar:
+            m.author === currentUser?.name
+              ? currentUser?.avatar ||
+                "https://placehold.co/40x40/8b5cf6/ffffff?text=U"
+              : "https://placehold.co/40x40/38bdf8/ffffff?text=T",
+          time: new Date().toLocaleTimeString([], {
+            hour: "2-digit",
+            minute: "2-digit",
+          }),
+          text: m.message,
+          isCurrentUser: m.author === currentUser?.name,
+        }));
+        setMessages(fetched);
+      } catch (err) {
+        console.error("❌ Error fetching chat:", err);
+      }
+    };
+    fetchMessages();
+  }, [currentUser]);
+
   // ------------------- Send New Message -------------------
-  const handleSendMessage = (e: React.FormEvent) => {
+  const handleSendMessage = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (!newMessage.trim()) return;
@@ -58,8 +63,10 @@ export default function Chat() {
 
     const newChatMessage: ChatMessage = {
       id: Date.now(),
-      author: "Dia",
-      avatar: "https://placehold.co/40x40/38bdf8/ffffff?text=D",
+      author: currentUser?.name || "You",
+      avatar:
+        currentUser?.avatar ||
+        "https://placehold.co/40x40/8b5cf6/ffffff?text=U",
       time: timeString,
       text: newMessage,
       isCurrentUser: true,
@@ -67,6 +74,38 @@ export default function Chat() {
 
     setMessages((prev) => [...prev, newChatMessage]);
     setNewMessage("");
+
+    // Save message to backend
+    try {
+      await axios.post("http://127.0.0.1:5000/chat", {
+        author: currentUser?.name || "You",
+        message: newMessage,
+      });
+    } catch (error) {
+      console.error("❌ Error saving message:", error);
+    }
+
+    // Optional: simulate teammate reply for demo
+    if (teamMembers.length > 0) {
+      setTimeout(() => {
+        const randomMember =
+          teamMembers[Math.floor(Math.random() * teamMembers.length)];
+
+        const reply: ChatMessage = {
+          id: Date.now() + 1,
+          author: randomMember.name,
+          avatar: randomMember.avatar,
+          time: new Date().toLocaleTimeString([], {
+            hour: "2-digit",
+            minute: "2-digit",
+          }),
+          text: `Got it, ${currentUser?.name || "there"}!`,
+          isCurrentUser: false,
+        };
+
+        setMessages((prev) => [...prev, reply]);
+      }, 1500);
+    }
   };
 
   // ------------------- Summarize Chat via Flask API -------------------
@@ -79,11 +118,14 @@ export default function Chat() {
         chat: messages.map((m) => ({ message: m.text })),
       };
 
-      const response = await axios.post("http://127.0.0.1:5000/summarize", chatPayload);
+      const response = await axios.post(
+        "http://127.0.0.1:5000/summarize",
+        chatPayload
+      );
 
       setSummaryText(response.data.summary);
     } catch (error) {
-      console.error("Error summarizing chat:", error);
+      console.error("❌ Error summarizing chat:", error);
       setSummaryText("❌ Failed to generate summary. Please try again.");
     } finally {
       setIsGeneratingSummary(false);
@@ -140,7 +182,10 @@ export default function Chat() {
           ))}
         </div>
 
-        <form onSubmit={handleSendMessage} className="mt-4 pt-4 border-t border-zinc-700">
+        <form
+          onSubmit={handleSendMessage}
+          className="mt-4 pt-4 border-t border-zinc-700"
+        >
           <input
             type="text"
             placeholder="Type your message..."
@@ -155,7 +200,9 @@ export default function Chat() {
       {showSummaryModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 modal-backdrop">
           <div className="card w-full max-w-2xl">
-            <h2 className="text-heading-xl font-heading mb-4">✨ AI Chat Summary</h2>
+            <h2 className="text-heading-xl font-heading mb-4">
+              ✨ AI Chat Summary
+            </h2>
 
             <div className="text-body-md font-body text-zinc-300 max-h-[60vh] overflow-y-auto pr-2">
               {isGeneratingSummary ? (

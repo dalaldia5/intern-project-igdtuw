@@ -15,12 +15,12 @@ export default function Auth() {
   const [error, setError] = useState("");
   const [isCheckingAuth, setIsCheckingAuth] = useState(true);
 
-  // ✅ Use environment variable for backend URL
+  // ✅ Backend URL (from .env)
   const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
 
-  // ✅ On mount, check auth state
+  // ✅ Delay auth check briefly to prevent flicker
   useEffect(() => {
-    const timer = setTimeout(() => setIsCheckingAuth(false), 200);
+    const timer = setTimeout(() => setIsCheckingAuth(false), 300);
     return () => clearTimeout(timer);
   }, []);
 
@@ -37,7 +37,7 @@ export default function Auth() {
     }
   }, [isAuthenticated, router, isCheckingAuth]);
 
-  // ✅ Login function (connects to backend)
+  // ✅ LOGIN HANDLER
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
@@ -46,24 +46,25 @@ export default function Auth() {
     try {
       const res = await fetch(`${API_URL}/auth/login`, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password }),
       });
 
+      
       if (!res.ok) {
-        const data = await res.json().catch(() => ({}));
-        throw new Error(data.message || "Login failed!");
+        const text = await res.text();
+        throw new Error(`Login failed: ${text}`);
       }
 
       const data = await res.json();
 
+
       // Save token + auth state
       localStorage.setItem("token", data.token);
       localStorage.setItem("isAuthenticated", "true");
+      localStorage.setItem("user", JSON.stringify(data.user));
 
-      login(username, password);
+      login(data.user.name, password);
       router.push("/dashboard");
     } catch (err: any) {
       console.error("Login error:", err);
@@ -73,7 +74,7 @@ export default function Auth() {
     }
   };
 
-  // ✅ Signup function (connects to backend)
+  // ✅ SIGNUP HANDLER
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
@@ -82,26 +83,22 @@ export default function Auth() {
     try {
       const res = await fetch(`${API_URL}/auth/signup`, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          name: username,
-          email,
-          password,
-        }),
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name: username, email, password }),
       });
 
       if (!res.ok) {
-        const data = await res.json().catch(() => ({}));
-        throw new Error(data.message || "Signup failed!");
+        const text = await res.text();
+        throw new Error(`Signup failed: ${text}`);
       }
 
       const data = await res.json();
 
+      // Save token + auth state
       localStorage.setItem("token", data.token);
       localStorage.setItem("isAuthenticated", "true");
       localStorage.setItem("fromSignup", "true");
+      localStorage.setItem("user", JSON.stringify(data.user));
 
       login(username, password);
       router.push("/team-setup");
@@ -113,7 +110,7 @@ export default function Auth() {
     }
   };
 
-  // Loader while checking
+  // ✅ Loader while checking
   if (isCheckingAuth) {
     return (
       <div className="min-h-screen dark-theme-background flex items-center justify-center">
@@ -124,20 +121,22 @@ export default function Auth() {
 
   if (isAuthenticated) return null;
 
-  // ✅ Your UI
+  // ✅ UI
   return (
     <div className="min-h-screen gradient-bg bg-pattern flex items-center justify-center p-4 relative overflow-hidden">
       <Head>
         <title>HackHub - Authentication</title>
       </Head>
 
+      {/* Background Effects */}
       <div className="absolute inset-0 overflow-hidden">
         <div className="background-orb absolute -top-40 -right-40 w-80 h-80 bg-purple-500/20 rounded-full blur-3xl"></div>
         <div className="background-orb absolute -bottom-40 -left-40 w-80 h-80 bg-pink-500/20 rounded-full blur-3xl"></div>
         <div className="background-orb absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-blue-500/10 rounded-full blur-3xl"></div>
       </div>
 
-      <div className="auth-container w-full max-w-lg">
+      {/* Auth Card */}
+      <div className="auth-container w-full max-w-lg z-10">
         <div className="text-center mb-8">
           <div className="auth-logo w-20 h-20 bg-gradient-to-br from-purple-500 via-pink-500 to-orange-500 rounded-2xl mx-auto mb-4 flex items-center justify-center shadow-2xl">
             <span className="text-3xl">🚀</span>
@@ -149,6 +148,7 @@ export default function Auth() {
         </div>
 
         <div className="auth-card vibrant-card p-8">
+          {/* Initial view */}
           {view === "initial" && (
             <div className="text-center">
               <h2 className="text-3xl font-bold text-white mb-2">Get Started</h2>
@@ -159,7 +159,7 @@ export default function Auth() {
               <div className="space-y-4">
                 <button
                   onClick={() => setView("login")}
-                  className="w-full bg-slate-700/50 hover:bg-slate-600/50 text-white font-semibold py-4 px-6 rounded-xl border border-slate-600/50 hover:border-slate-500/50 transition-all duration-300"
+                  className="w-full bg-slate-700/50 hover:bg-slate-600/50 text-white font-semibold py-4 px-6 rounded-xl border border-slate-600/50 transition-all duration-300"
                 >
                   Login to Existing Account
                 </button>
@@ -181,6 +181,7 @@ export default function Auth() {
             </div>
           )}
 
+          {/* Login View */}
           {view === "login" && (
             <div>
               <div className="text-center mb-8">
@@ -234,6 +235,7 @@ export default function Auth() {
             </div>
           )}
 
+          {/* Signup View */}
           {view === "signup" && (
             <div>
               <h2 className="text-2xl font-bold text-center mb-6 text-slate-100">
@@ -283,7 +285,7 @@ export default function Auth() {
                 <button
                   type="submit"
                   disabled={loading}
-                  className="w-full btn-primary"
+                  className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 text-white font-semibold py-3 rounded-lg shadow-lg hover:shadow-xl transition-all duration-300"
                 >
                   {loading ? "Creating..." : "Sign Up & Create Team"}
                 </button>

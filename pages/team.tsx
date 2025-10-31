@@ -1,3 +1,4 @@
+"use client";
 import { useState } from "react";
 import Layout from "../components/Layout";
 
@@ -13,7 +14,8 @@ export default function Team() {
   const [teamBio, setTeamBio] = useState(
     "Building the future, one line of code at a time. We're a passionate team of developers and designers focused on creating impactful AI-driven solutions."
   );
-  const [inviteCode, setInviteCode] = useState("HACK-25-XYZ");
+  const [inviteCode] = useState("HACK-25-XYZ");
+
   const [members, setMembers] = useState<TeamMember[]>([
     {
       id: 1,
@@ -40,60 +42,60 @@ export default function Team() {
       avatar: "https://placehold.co/40x40/4f46e5/ffffff?text=A",
     },
   ]);
-  const [showEditMemberModal, setShowEditMemberModal] = useState(false);
-  const [currentMemberId, setCurrentMemberId] = useState<number | null>(null);
-  const [editMemberName, setEditMemberName] = useState("");
-  const [editMemberRole, setEditMemberRole] = useState("");
 
-  const copyInviteCode = () => {
-    navigator.clipboard.writeText(inviteCode);
-    alert("Invite code copied to clipboard!");
+  const [showEditMemberModal, setShowEditMemberModal] = useState(false);
+  const [currentMember, setCurrentMember] = useState<TeamMember | null>(null);
+
+  const copyInviteCode = async () => {
+    try {
+      await navigator.clipboard.writeText(inviteCode);
+      alert("✅ Invite code copied to clipboard!");
+    } catch {
+      alert("❌ Failed to copy invite code");
+    }
   };
 
   const saveTeamProfile = () => {
-    // In a real app, this would save to a backend
-    alert("Team profile updated!");
+    alert("✅ Team profile updated!");
   };
 
   const openEditMemberModal = (member: TeamMember) => {
-    setCurrentMemberId(member.id);
-    setEditMemberName(member.name);
-    setEditMemberRole(member.role);
+    setCurrentMember(member);
     setShowEditMemberModal(true);
   };
 
   const closeEditMemberModal = () => {
     setShowEditMemberModal(false);
-    setCurrentMemberId(null);
+    setCurrentMember(null);
   };
 
   const updateMember = () => {
-    if (currentMemberId === null) return;
-
-    setMembers(
-      members.map((member) =>
-        member.id === currentMemberId
-          ? { ...member, name: editMemberName, role: editMemberRole }
-          : member
+    if (!currentMember) return;
+    setMembers((prev) =>
+      prev.map((member) =>
+        member.id === currentMember.id ? currentMember : member
       )
     );
-
     closeEditMemberModal();
   };
 
   return (
     <Layout>
+    <div className="p-6">
+      {/* Header */}
       <h2 className="text-display-md font-display text-gradient-primary mb-6 text-glow">
         Team Settings
       </h2>
       <p className="text-body-sm font-body text-zinc-400 mb-6 max-w-3xl">
         Manage your team's identity and member roles here. You can update the
-        team bio that appears on the dashboard and assign specific roles to each
-        member to clarify responsibilities. Your unique invite code is also
-        available here to share with new members.
+        team bio and assign roles to clarify responsibilities. Your unique
+        invite code is also available here to share with new members.
       </p>
+
+      {/* Team Profile Card */}
       <div className="card mb-6">
         <h3 className="text-heading-lg font-heading mb-4">Team Profile</h3>
+
         <div className="space-y-4">
           <div>
             <label className="label-enhanced">Team Name</label>
@@ -104,6 +106,7 @@ export default function Team() {
               className="input-enhanced w-full mt-1"
             />
           </div>
+
           <div>
             <label className="label-enhanced">Team Bio</label>
             <textarea
@@ -112,6 +115,7 @@ export default function Team() {
               className="input-enhanced w-full mt-1 h-24"
             />
           </div>
+
           <div>
             <label className="label-enhanced">Team Invite Code</label>
             <div className="flex items-center gap-2 mt-1">
@@ -129,6 +133,7 @@ export default function Team() {
               </button>
             </div>
           </div>
+
           <div className="pt-4">
             <button onClick={saveTeamProfile} className="btn-primary">
               Save Changes
@@ -136,6 +141,8 @@ export default function Team() {
           </div>
         </div>
       </div>
+
+      {/* Members Card */}
       <div className="card">
         <h3 className="text-heading-lg font-heading mb-4">Manage Members</h3>
         <div className="space-y-3">
@@ -169,30 +176,40 @@ export default function Team() {
       </div>
 
       {/* Edit Member Modal */}
-      {showEditMemberModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 modal-backdrop">
+      {showEditMemberModal && currentMember && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
           <div className="card w-full max-w-md">
             <h2 className="text-heading-xl font-heading mb-6">
               Edit Team Member
             </h2>
-            <div>
-              <div className="mb-4">
+
+            <div className="space-y-4">
+              <div>
                 <label className="label-enhanced">Name</label>
                 <input
                   type="text"
-                  value={editMemberName}
-                  onChange={(e) => setEditMemberName(e.target.value)}
+                  value={currentMember.name}
+                  onChange={(e) =>
+                    setCurrentMember({
+                      ...currentMember,
+                      name: e.target.value,
+                    })
+                  }
                   className="input-enhanced w-full"
-                  required
                 />
               </div>
-              <div className="mb-6">
+
+              <div>
                 <label className="label-enhanced">Role</label>
                 <select
-                  value={editMemberRole}
-                  onChange={(e) => setEditMemberRole(e.target.value)}
+                  value={currentMember.role}
+                  onChange={(e) =>
+                    setCurrentMember({
+                      ...currentMember,
+                      role: e.target.value,
+                    })
+                  }
                   className="input-enhanced w-full"
-                  required
                 >
                   <option value="Leader">Leader</option>
                   <option value="Frontend">Frontend</option>
@@ -201,7 +218,8 @@ export default function Team() {
                   <option value="Designer">Designer</option>
                 </select>
               </div>
-              <div className="flex gap-4">
+
+              <div className="flex gap-4 pt-2">
                 <button
                   type="button"
                   onClick={closeEditMemberModal}
@@ -221,6 +239,7 @@ export default function Team() {
           </div>
         </div>
       )}
+    </div>
     </Layout>
   );
 }

@@ -35,5 +35,15 @@ router.post("/login", loginUser);
 // 👤 Get user profile (Protected)
 router.get("/me", protect, getUserProfile);
 
+// ✅ Verify Token (check if still valid)
+router.get("/verify", protect, (req, res) => {
+  res.status(200).json({
+    success: true,
+    message: "Token is valid",
+    user: req.user,
+  });
+});
+
+
 // ✅ Export router
 module.exports = router;

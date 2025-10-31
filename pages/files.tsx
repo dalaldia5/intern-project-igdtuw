@@ -40,11 +40,15 @@ export default function Files() {
 
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
+  // ✅ Use environment variable (auto switches between localhost & Render)
+  const API_BASE =
+    process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
+
   // ✅ Fetch all files from backend
   useEffect(() => {
     const fetchFiles = async () => {
       try {
-        const res = await fetch("http://localhost:5000/api/files/files");
+        const res = await fetch(`${API_BASE}/files/files`);
         const data = await res.json();
         if (res.ok) {
           setFiles(
@@ -61,7 +65,7 @@ export default function Files() {
       }
     };
     fetchFiles();
-  }, []);
+  }, [API_BASE]);
 
   const triggerFileSelect = () => {
     fileInputRef.current?.click();
@@ -76,7 +80,7 @@ export default function Files() {
     formData.append("file", file);
 
     try {
-      const res = await fetch("http://localhost:5000/api/files/upload", {
+      const res = await fetch(`${API_BASE}/files/upload`, {
         method: "POST",
         body: formData,
       });
@@ -104,35 +108,35 @@ export default function Files() {
     }
   };
 
+  // ✅ Delete file
   const handleDeleteFile = async (filename: string) => {
-  if (!window.confirm(`Are you sure you want to delete "${filename}"?`)) return;
+    if (!window.confirm(`Are you sure you want to delete "${filename}"?`)) return;
 
-  try {
-    const res = await fetch(`http://localhost:5000/api/files/file/${filename}`, {
-      method: "DELETE",
-    });
-
-    let data;
     try {
-      data = await res.json();
-    } catch {
-      data = { message: "Unexpected response (HTML returned instead of JSON)" };
+      const res = await fetch(`${API_BASE}/files/file/${filename}`, {
+        method: "DELETE",
+      });
+
+      let data;
+      try {
+        data = await res.json();
+      } catch {
+        data = { message: "Unexpected response (HTML returned instead of JSON)" };
+      }
+
+      if (res.ok) {
+        alert("✅ File deleted successfully!");
+        setFiles((prev) => prev.filter((f) => f.name !== filename));
+      } else {
+        alert(`❌ Failed to delete: ${data.message}`);
+      }
+    } catch (err) {
+      console.error("Error deleting file:", err);
+      alert("Error deleting file!");
     }
+  };
 
-    if (res.ok) {
-      alert("✅ File deleted successfully!");
-      setFiles((prev) => prev.filter((f) => f.name !== filename));
-    } else {
-      alert(`❌ Failed to delete: ${data.message}`);
-    }
-  } catch (err) {
-    console.error("Error deleting file:", err);
-    alert("Error deleting file!");
-  }
-};
-
-
-
+  // ✅ Modal handlers
   const openAddLinkModal = () => {
     setNewLinkTitle("");
     setNewLinkUrl("");
@@ -158,6 +162,7 @@ export default function Files() {
     closeAddLinkModal();
   };
 
+  // ✅ Render UI
   return (
     <Layout>
       <h2 className="text-display-md font-display text-gradient-primary mb-6 text-glow">
@@ -202,7 +207,7 @@ export default function Files() {
               </button>
 
               <a
-                href={`http://localhost:5000/api/files/file/${file.name}`}
+                href={`${API_BASE}/files/file/${file.name}`}
                 download
                 className="block"
               >
@@ -220,7 +225,7 @@ export default function Files() {
           <div className="mt-4 text-center">
             <p className="text-sm text-zinc-400 mb-2">Latest uploaded file:</p>
             <a
-              href={`http://localhost:5000/api/files/file/${uploadedFile}`}
+              href={`${API_BASE}/files/file/${uploadedFile}`}
               download
               className="text-blue-400 underline"
             >

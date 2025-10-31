@@ -251,12 +251,12 @@ export default function Dashboard() {
   };
 
   // Redirect to login if not authenticated
-  useEffect(() => {
-    if (!isLoading && !isAuthenticated && typeof window !== "undefined") {
-      console.log("Not authenticated, redirecting to auth page");
-      router.replace("/auth");
-    }
-  }, [isAuthenticated, router, isLoading]);
+  // useEffect(() => {
+  //   if (!isLoading && !isAuthenticated && typeof window !== "undefined") {
+  //     console.log("Not authenticated, redirecting to auth page");
+  //     router.replace("/auth");
+  //   }
+  // }, [isAuthenticated, router, isLoading]);
 
   // Handle Chart.js script load
   const handleChartJsLoad = () => {
@@ -409,7 +409,7 @@ export default function Dashboard() {
   }
 
   return (
-    <Layout>
+    <> 
       <Head>
         <title>HackHub - Dashboard</title>
       </Head>
@@ -735,6 +735,6 @@ export default function Dashboard() {
           </div>
         )}
       </div>
-    </Layout>
+      </>
   );
 }

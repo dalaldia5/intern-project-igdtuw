@@ -4,29 +4,39 @@ import { AppProvider } from "../context/AppContext";
 import Head from "next/head";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
+import Layout from "../components/Layout";
 
 export default function MyApp({ Component, pageProps }: AppProps) {
   const router = useRouter();
   const [initialRedirectDone, setInitialRedirectDone] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
 
   useEffect(() => {
-    // Run this only on the client side
     if (typeof window === "undefined") return;
 
-    if (!initialRedirectDone) {
-      const isAuthenticated =
-        typeof window !== "undefined" &&
-        localStorage.getItem("isAuthenticated") === "true";
+    const authStatus = localStorage.getItem("isAuthenticated") === "true";
+    setIsAuthenticated(authStatus);
 
-      // Redirect only if user not logged in and not already on /auth
-      if (!isAuthenticated && router.pathname !== "/auth") {
+    if (!initialRedirectDone) {
+      const isAuthPage = router.pathname === "/auth";
+
+      if (!authStatus && !isAuthPage) {
+        // Redirect unauthenticated user to auth page
         router.replace("/auth");
+      } else if (authStatus && isAuthPage) {
+        // Redirect logged-in user to dashboard
+        router.replace("/dashboard");
       }
 
-      // Mark that initial redirect has been handled
       setInitialRedirectDone(true);
     }
   }, [router, initialRedirectDone]);
+
+  // Prevent flicker during redirect check
+  if (isAuthenticated === null) return null;
+
+  const isAuthPage = router.pathname === "/auth";
+  const isDashboardPage = router.pathname.startsWith("/dashboard");
 
   return (
     <AppProvider>
@@ -34,7 +44,15 @@ export default function MyApp({ Component, pageProps }: AppProps) {
         <title>HackHub - Collaborative Hackathon Platform</title>
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
       </Head>
-      <Component {...pageProps} />
+
+      {/* ✅ Only wrap dashboard pages inside Layout */}
+      {isAuthenticated && isDashboardPage ? (
+        <Layout>
+          <Component {...pageProps} />
+        </Layout>
+      ) : (
+        <Component {...pageProps} />
+      )}
     </AppProvider>
   );
 }

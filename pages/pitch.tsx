@@ -15,6 +15,10 @@ export default function Pitch() {
   const [isGeneratingImprovements, setIsGeneratingImprovements] =
     useState(false);
 
+  // ✅ Use environment variable (auto switches between localhost & Render)
+  const API_BASE =
+    process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
+
   // ✅ Generate Pitch using Gemini API
   const generatePitch = async () => {
     if (!pitchInput.trim()) {
@@ -26,7 +30,7 @@ export default function Pitch() {
     setPitchOutput("Generating your pitch using Gemini AI...");
 
     try {
-      const res = await fetch("http://localhost:5000/api/gemini", {
+      const res = await fetch(`${API_BASE}/gemini`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ idea: pitchInput }),
@@ -56,7 +60,7 @@ export default function Pitch() {
     setAssistantOutput("Analyzing your pitch for improvements...");
 
     try {
-      const res = await fetch("http://localhost:5000/api/gemini", {
+      const res = await fetch(`${API_BASE}/gemini`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

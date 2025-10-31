@@ -29,6 +29,8 @@ type AppContextType = {
   login: (username: string, password: string) => void;
   logout: () => void;
 
+  isInitialized: boolean; // ✅ added this line
+
   teamName: string;
   setTeamName: (name: string) => void;
   teamBio: string;
@@ -58,6 +60,7 @@ const defaultContextValue: AppContextType = {
   setIsAuthenticated: () => {},
   login: () => {},
   logout: () => {},
+  isInitialized: false, // ✅ added default value
   teamName: "My Team",
   setTeamName: () => {},
   teamBio: "Our team is participating in a hackathon!",
@@ -148,7 +151,7 @@ export const AppProvider = ({ children }: AppProviderProps) => {
         setCurrentUser(JSON.parse(savedUser));
       }
 
-      setIsInitialized(true);
+      setIsInitialized(true); // ✅ ensures app waits until localStorage is checked
     }
   }, []);
 
@@ -265,6 +268,7 @@ export const AppProvider = ({ children }: AppProviderProps) => {
     setIsAuthenticated,
     login,
     logout,
+    isInitialized, // ✅ added here
     teamName,
     setTeamName,
     teamBio,

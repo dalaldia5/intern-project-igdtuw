@@ -16,7 +16,10 @@ const app = express();
 // ✅ CORS setup (allow frontend localhost)
 app.use(
   cors({
-    origin: "http://localhost:3000", // Your React app
+    origin: ["http://localhost:3000", // Your React app
+          "https://intern-project-igdtuw.vercel.app",
+    ],
+
     credentials: true,
   })
 );

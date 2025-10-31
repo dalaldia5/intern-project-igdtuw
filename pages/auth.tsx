@@ -17,6 +17,8 @@ export default function Auth() {
 
   // ✅ Backend URL (from .env)
   const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
+  console.log("✅ Current API_URL:", API_URL);
+
 
   // ✅ Delay auth check briefly to prevent flicker
   useEffect(() => {
